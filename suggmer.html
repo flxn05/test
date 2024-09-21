@@ -32,6 +32,7 @@
             padding: 10px;
             border-radius: 8px;
             font-size: 1.1rem;
+            white-space: pre-wrap; /* Preserve whitespace formatting */
         }
     </style>
 </head>
@@ -51,7 +52,6 @@
         // Stopwatch function
         function startStopwatch() {
             if (stopwatchRunning) return;  // Prevent multiple timers
-            
             stopwatchRunning = true;
             const startTime = Date.now() - elapsedTime;
             
@@ -67,6 +67,11 @@
 
         // Start Speech Recognition
         function startRecognition() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert("Speech recognition is not supported in this browser. Please try using Google Chrome.");
+                return;
+            }
+
             recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             recognition.continuous = true;
             recognition.interimResults = true;
@@ -75,10 +80,9 @@
             recognition.onresult = (event) => {
                 const transcriptDiv = document.getElementById('transcript');
                 let finalTranscript = '';
-                
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript + ' ';
+                        finalTranscript += event.results[i][0].transcript + '\n';
                     }
                 }
                 transcriptDiv.textContent = finalTranscript;
@@ -91,11 +95,7 @@
             recognition.start();
         }
 
-        // Stop recognition when done
-        function stopRecognition() {
-            recognition.stop();
-        }
-
+        // Event listener for the button
         document.getElementById('startButton').addEventListener('click', () => {
             startStopwatch();
             startRecognition();
