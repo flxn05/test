@@ -32,12 +32,11 @@
             padding: 10px;
             border-radius: 8px;
             font-size: 1.1rem;
-            white-space: pre-wrap; /* Preserve whitespace formatting */
         }
     </style>
 </head>
 <body>
-<div>divvv</div>
+
     <div class="stopwatch">00:00:00</div>
     <button id="startButton">Start Stopwatch and Transcription</button>
     
@@ -48,12 +47,11 @@
         let timer;
         let elapsedTime = 0;
         let stopwatchRunning = false;
-        let fullTranscript = ''; // Store the entire transcript here
-        let lastFinalResult = ''; // Keep track of the last finalized result
         
         // Stopwatch function
         function startStopwatch() {
             if (stopwatchRunning) return;  // Prevent multiple timers
+            
             stopwatchRunning = true;
             const startTime = Date.now() - elapsedTime;
             
@@ -69,50 +67,35 @@
 
         // Start Speech Recognition
         function startRecognition() {
-            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                alert("Speech recognition is not supported in this browser. Please try using Google Chrome.");
-                return;
-            }
-
             recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.continuous = true;  // Keep recognition running even between pauses
+            recognition.continuous = true;
             recognition.interimResults = true;
             recognition.lang = 'en-US';
-
+            
             recognition.onresult = (event) => {
-                let interimTranscript = '';
+                const transcriptDiv = document.getElementById('transcript');
+                let finalTranscript = '';
+                
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    // Append final results to the full transcript
                     if (event.results[i].isFinal) {
-                        const finalText = event.results[i][0].transcript.trim();
-                        // Ensure we don't append the same final result again
-                        if (finalText !== lastFinalResult) {
-                            fullTranscript += finalText + '\n';
-                            lastFinalResult = finalText;
-                        }
-                    } else {
-                        // Capture the interim transcript (but don't add to fullTranscript)
-                        interimTranscript = event.results[i][0].transcript;
+                        finalTranscript += event.results[i][0].transcript + ' ';
                     }
                 }
-                // Update the transcript div with full and interim transcript
-                const transcriptDiv = document.getElementById('transcript');
-                transcriptDiv.textContent = fullTranscript + interimTranscript;
+                transcriptDiv.textContent = finalTranscript;
             };
 
             recognition.onerror = (event) => {
                 console.error('Speech recognition error detected: ' + event.error);
             };
 
-            // Automatically restart the recognition when it ends due to inactivity
-            recognition.onend = () => {
-                recognition.start();  // Restart the recognition service after it stops
-            };
-
             recognition.start();
         }
 
-        // Event listener for the button
+        // Stop recognition when done
+        function stopRecognition() {
+            recognition.stop();
+        }
+
         document.getElementById('startButton').addEventListener('click', () => {
             startStopwatch();
             startRecognition();
