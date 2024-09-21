@@ -48,6 +48,7 @@
         let timer;
         let elapsedTime = 0;
         let stopwatchRunning = false;
+        let fullTranscript = ''; // Store the entire transcript here
         
         // Stopwatch function
         function startStopwatch() {
@@ -78,14 +79,16 @@
             recognition.lang = 'en-US';
 
             recognition.onresult = (event) => {
-                const transcriptDiv = document.getElementById('transcript');
-                let finalTranscript = '';
+                let interimTranscript = '';
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript + '\n';
+                        fullTranscript += event.results[i][0].transcript + '\n'; // Append to the full transcript
+                    } else {
+                        interimTranscript += event.results[i][0].transcript; // Store the interim results
                     }
                 }
-                transcriptDiv.textContent = finalTranscript;
+                const transcriptDiv = document.getElementById('transcript');
+                transcriptDiv.textContent = fullTranscript + interimTranscript; // Display full + interim transcript
             };
 
             recognition.onerror = (event) => {
