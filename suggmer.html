@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch and Live Transcription</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+
+        .stopwatch {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .transcript {
+            width: 80%;
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="stopwatch">00:00:00</div>
+    <button id="startButton">Start Stopwatch and Transcription</button>
+    
+    <div class="transcript" id="transcript"></div>
+
+    <script>
+        let recognition;
+        let timer;
+        let elapsedTime = 0;
+        let stopwatchRunning = false;
+        
+        // Stopwatch function
+        function startStopwatch() {
+            if (stopwatchRunning) return;  // Prevent multiple timers
+            
+            stopwatchRunning = true;
+            const startTime = Date.now() - elapsedTime;
+            
+            timer = setInterval(() => {
+                elapsedTime = Date.now() - startTime;
+                const date = new Date(elapsedTime);
+                const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+                const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+                const milliseconds = String(Math.floor(date.getUTCMilliseconds() / 10)).padStart(2, '0');
+                document.querySelector('.stopwatch').textContent = `${minutes}:${seconds}:${milliseconds}`;
+            }, 10);
+        }
+
+        // Start Speech Recognition
+        function startRecognition() {
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            
+            recognition.onresult = (event) => {
+                const transcriptDiv = document.getElementById('transcript');
+                let finalTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript + ' ';
+                    }
+                }
+                transcriptDiv.textContent = finalTranscript;
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error detected: ' + event.error);
+            };
+
+            recognition.start();
+        }
+
+        // Stop recognition when done
+        function stopRecognition() {
+            recognition.stop();
+        }
+
+        document.getElementById('startButton').addEventListener('click', () => {
+            startStopwatch();
+            startRecognition();
+        });
+    </script>
+
+</body>
+</html>
