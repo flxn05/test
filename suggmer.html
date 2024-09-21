@@ -37,7 +37,7 @@
     </style>
 </head>
 <body>
-
+<div>div</div>
     <div class="stopwatch">00:00:00</div>
     <button id="startButton">Start Stopwatch and Transcription</button>
     
@@ -81,15 +81,18 @@
             recognition.onresult = (event) => {
                 let interimTranscript = '';
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    // Append final results to the full transcript
+                    // Check if it's a final result and append it only once
                     if (event.results[i].isFinal) {
-                        fullTranscript += event.results[i][0].transcript + '\n';
+                        const finalText = event.results[i][0].transcript.trim();
+                        // Avoid adding duplicates by comparing the last words
+                        if (!fullTranscript.endsWith(finalText)) {
+                            fullTranscript += finalText + '\n';
+                        }
                     } else {
-                        // Capture the interim transcript (but don't add to fullTranscript)
-                        interimTranscript += event.results[i][0].transcript;
+                        interimTranscript = event.results[i][0].transcript;
                     }
                 }
-                // Update the transcript div with full and current interim results
+                // Update the transcript div with full and interim transcript
                 const transcriptDiv = document.getElementById('transcript');
                 transcriptDiv.textContent = fullTranscript + interimTranscript;
             };
