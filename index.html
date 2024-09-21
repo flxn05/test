@@ -124,6 +124,12 @@
 margin-top: 6px; padding-inline: 12px; padding-block: 4px; background-color: gray; color: white;
 border: none;
 border-radius: 8px;}
+.how {
+  color: grey;
+}
+.answer {
+  color: lightgrey;
+}
 </style>
     <script>
         function sendEmail() {
@@ -131,7 +137,7 @@ border-radius: 8px;}
             var email = document.getElementById("email").value;
             var message = document.getElementById("message").value;
             
-            var subject = "New registration - get-gc.github.io/get - reg-req";
+            var subject = "New registration request from " + name + " - get-gc.github.io/get - reg-req";
             var body = "HI! I'd like to join gigaCHAT. Here are my registration-request details:\n\n" +
                        "Display name: " + name + "\n" +
                        "Email: " + email + "\n" +
@@ -168,9 +174,9 @@ border-radius: 8px;}
     </form>
     </main>
     <div id="lfooter">
-    <p>How do I access my new account?</p>
+    <p class="how">How do I access my new account?</p>
     <div class="spaceee" style="margin-right: 6px;"></div>
-    <p>We'll send you an email with your log in data. Once logged in, you can use the service normally. Feel free to contact us: get.giga.chat@gmail.com     <a href="https://get-gc.github.io/help-and-legal-info"><button class="help">Help/Information</button></a></p>
+    <p class="answer">We'll send you an email with your log in data. Once logged in, you can use the service normally. Feel free to contact us: get.giga.chat@gmail.com     <a href="https://get-gc.github.io/help-and-legal-info"><button class="help">Help/Information</button></a></p>
     </div>
 </body>
 </html>
