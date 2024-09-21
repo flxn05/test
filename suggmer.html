@@ -81,14 +81,17 @@
             recognition.onresult = (event) => {
                 let interimTranscript = '';
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    // Append final results to the full transcript
                     if (event.results[i].isFinal) {
-                        fullTranscript += event.results[i][0].transcript + '\n'; // Append to the full transcript
+                        fullTranscript += event.results[i][0].transcript + '\n';
                     } else {
-                        interimTranscript += event.results[i][0].transcript; // Store the interim results
+                        // Capture the interim transcript (but don't add to fullTranscript)
+                        interimTranscript += event.results[i][0].transcript;
                     }
                 }
+                // Update the transcript div with full and current interim results
                 const transcriptDiv = document.getElementById('transcript');
-                transcriptDiv.textContent = fullTranscript + interimTranscript; // Display full + interim transcript
+                transcriptDiv.textContent = fullTranscript + interimTranscript;
             };
 
             recognition.onerror = (event) => {
