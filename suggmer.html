@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -32,6 +32,7 @@
             padding: 10px;
             border-radius: 8px;
             font-size: 1.1rem;
+            white-space: pre-wrap;
         }
     </style>
 </head>
@@ -47,11 +48,12 @@
         let timer;
         let elapsedTime = 0;
         let stopwatchRunning = false;
-        
+        let finalTranscript = ''; // Full transcript for final results
+        let interimTranscript = ''; // To store temporary (interim) results
+
         // Stopwatch function
         function startStopwatch() {
             if (stopwatchRunning) return;  // Prevent multiple timers
-            
             stopwatchRunning = true;
             const startTime = Date.now() - elapsedTime;
             
@@ -67,37 +69,43 @@
 
         // Start Speech Recognition
         function startRecognition() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert("Speech recognition is not supported in this browser. Please try using Google Chrome.");
+                return;
+            }
+
             recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.continuous = true;
+            recognition.continuous = true;  // Keep recognition running even between pauses
             recognition.interimResults = true;
             recognition.lang = 'en-US';
-            
+
             recognition.onresult = (event) => {
-                const transcriptDiv = document.getElementById('transcript');
-                let finalTranscript = '';
-                
+                interimTranscript = '';  // Clear interim text each time
+
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript + ' ';
+                        finalTranscript += event.results[i][0].transcript + ' ';  // Add finalized text
+                    } else {
+                        interimTranscript = event.results[i][0].transcript;  // Show interim text
                     }
                 }
-                transcriptDiv.textContent = finalTranscript;
+
+                // Update the transcript div
+                const transcriptDiv = document.getElementById('transcript');
+                transcriptDiv.textContent = finalTranscript + '\n' + interimTranscript;
             };
 
             recognition.onerror = (event) => {
                 console.error('Speech recognition error detected: ' + event.error);
             };
 
+            // No onend function to restart recognition automatically!
             recognition.start();
         }
 
-        // Stop recognition when done
-        function stopRecognition() {
-            recognition.stop();
-        }
-
+        // Event listener for the button
         document.getElementById('startButton').addEventListener('click', () => {
-            startStopwatch();
+            if (!stopwatchRunning) startStopwatch();
             startRecognition();
         });
     </script>
