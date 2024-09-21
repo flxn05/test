@@ -39,7 +39,7 @@
 <body>
 
     <div class="stopwatch">00:00:00</div>
-    <button id="startButton">Start Stopwatch and Transcription</button>
+    <button id="toggleButton">Start Stopwatch and Transcription</button>
     
     <div class="transcript" id="transcript"></div>
 
@@ -48,8 +48,10 @@
         let timer;
         let elapsedTime = 0;
         let stopwatchRunning = false;
-        let finalTranscript = ''; // Full transcript for final results
-        let interimTranscript = ''; // To store temporary (interim) results
+        let isRecognitionActive = false;
+        let finalTranscript = ''; // Stores final transcripts across sessions
+        let currentTranscript = ''; // To store transcript of current session
+        let interimTranscript = ''; // Stores temporary (interim) results
 
         // Stopwatch function
         function startStopwatch() {
@@ -67,6 +69,12 @@
             }, 10);
         }
 
+        // Stop Stopwatch
+        function stopStopwatch() {
+            clearInterval(timer);
+            stopwatchRunning = false;
+        }
+
         // Start Speech Recognition
         function startRecognition() {
             if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -82,20 +90,18 @@
             recognition.onresult = (event) => {
                 interimTranscript = '';  // Clear interim text each time
 
-                // Iterate through all results
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
-                        // Only update final transcript, avoiding repeated interim text
-                        finalTranscript = event.results[i][0].transcript;  // Overwrite finalTranscript
+                        // Add finalized text to current session's transcript
+                        currentTranscript += event.results[i][0].transcript + ' ';
                     } else {
-                        // Save interim result for the current utterance
                         interimTranscript = event.results[i][0].transcript;
                     }
                 }
 
-                // Update the transcript div with only the last complete result (final or interim)
+                // Update the transcript div with previous sessions + current + interim text
                 const transcriptDiv = document.getElementById('transcript');
-                transcriptDiv.textContent = finalTranscript + ' ' + interimTranscript;
+                transcriptDiv.textContent = finalTranscript + currentTranscript + interimTranscript;
             };
 
             recognition.onerror = (event) => {
@@ -103,12 +109,33 @@
             };
 
             recognition.start();
+            isRecognitionActive = true;
         }
 
-        // Event listener for the button
-        document.getElementById('startButton').addEventListener('click', () => {
-            if (!stopwatchRunning) startStopwatch();
-            startRecognition();
+        // Stop Speech Recognition
+        function stopRecognition() {
+            if (recognition && isRecognitionActive) {
+                recognition.stop();
+                isRecognitionActive = false;
+                finalTranscript += currentTranscript; // Add the current session's transcript to the final transcript
+                currentTranscript = ''; // Reset the current transcript for the next session
+            }
+        }
+
+        // Toggle between Start/Stop actions for both Stopwatch and Speech Recognition
+        document.getElementById('toggleButton').addEventListener('click', () => {
+            const button = document.getElementById('toggleButton');
+            if (!stopwatchRunning) {
+                // Start the stopwatch and recognition
+                startStopwatch();
+                startRecognition();
+                button.textContent = 'Pause Stopwatch and Transcription';
+            } else {
+                // Pause the stopwatch and recognition
+                stopStopwatch();
+                stopRecognition();
+                button.textContent = 'Resume Stopwatch and Transcription';
+            }
         });
     </script>
 
