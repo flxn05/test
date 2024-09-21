@@ -37,7 +37,7 @@
     </style>
 </head>
 <body>
-<div>div</div>
+<div>divvv</div>
     <div class="stopwatch">00:00:00</div>
     <button id="startButton">Start Stopwatch and Transcription</button>
     
@@ -49,6 +49,7 @@
         let elapsedTime = 0;
         let stopwatchRunning = false;
         let fullTranscript = ''; // Store the entire transcript here
+        let lastFinalResult = ''; // Keep track of the last finalized result
         
         // Stopwatch function
         function startStopwatch() {
@@ -81,14 +82,16 @@
             recognition.onresult = (event) => {
                 let interimTranscript = '';
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    // Check if it's a final result and append it only once
+                    // Append final results to the full transcript
                     if (event.results[i].isFinal) {
                         const finalText = event.results[i][0].transcript.trim();
-                        // Avoid adding duplicates by comparing the last words
-                        if (!fullTranscript.endsWith(finalText)) {
+                        // Ensure we don't append the same final result again
+                        if (finalText !== lastFinalResult) {
                             fullTranscript += finalText + '\n';
+                            lastFinalResult = finalText;
                         }
                     } else {
+                        // Capture the interim transcript (but don't add to fullTranscript)
                         interimTranscript = event.results[i][0].transcript;
                     }
                 }
