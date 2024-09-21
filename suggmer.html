@@ -73,10 +73,10 @@
             }
 
             recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.continuous = true;
+            recognition.continuous = true;  // Keep recognition running even between pauses
             recognition.interimResults = true;
             recognition.lang = 'en-US';
-            
+
             recognition.onresult = (event) => {
                 const transcriptDiv = document.getElementById('transcript');
                 let finalTranscript = '';
@@ -90,6 +90,11 @@
 
             recognition.onerror = (event) => {
                 console.error('Speech recognition error detected: ' + event.error);
+            };
+
+            // Automatically restart the recognition when it ends due to inactivity
+            recognition.onend = () => {
+                recognition.start();  // Restart the recognition service after it stops
             };
 
             recognition.start();
