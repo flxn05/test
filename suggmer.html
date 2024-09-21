@@ -82,24 +82,26 @@
             recognition.onresult = (event) => {
                 interimTranscript = '';  // Clear interim text each time
 
+                // Iterate through all results
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript + ' ';  // Add finalized text
+                        // Only update final transcript, avoiding repeated interim text
+                        finalTranscript = event.results[i][0].transcript;  // Overwrite finalTranscript
                     } else {
-                        interimTranscript = event.results[i][0].transcript;  // Show interim text
+                        // Save interim result for the current utterance
+                        interimTranscript = event.results[i][0].transcript;
                     }
                 }
 
-                // Update the transcript div
+                // Update the transcript div with only the last complete result (final or interim)
                 const transcriptDiv = document.getElementById('transcript');
-                transcriptDiv.textContent = finalTranscript + '\n' + interimTranscript;
+                transcriptDiv.textContent = finalTranscript + ' ' + interimTranscript;
             };
 
             recognition.onerror = (event) => {
                 console.error('Speech recognition error detected: ' + event.error);
             };
 
-            // No onend function to restart recognition automatically!
             recognition.start();
         }
 
