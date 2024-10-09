@@ -1,1 +1,67 @@
-<!DOCTYPE html><html lang="de"><head>    <meta charset="UTF-8">    <meta name="viewport" content="width=device-width, initial-scale=1.0">    <title>Spracherkennung mit Übersetzung</title></head><body><h2>Sprich etwas und es wird übersetzt:</h2><button id="start-record-btn">Aufnahme starten</button><p><strong>Erkannter Text:</strong> <span id="recognized-text"></span></p><p><strong>Übersetzter Text:</strong> <span id="translated-text"></span></p><script>let recognizing = false;let recognition;document.getElementById('start-record-btn').addEventListener('click', function() {    if (!('webkitSpeechRecognition' in window)) {        alert('Spracherkennung wird von deinem Browser nicht unterstützt. Bitte verwende Chrome.');        return;    }    if (!recognizing) {        recognition = new webkitSpeechRecognition();        recognition.lang = 'de-DE';  // Sprache für die Spracherkennung (hier Deutsch)        recognition.continuous = false; // true, um kontinuierlich zu hören        recognition.interimResults = false; // Zeige keine Zwischenergebnisse an        recognition.onstart = function() {            recognizing = true;            document.getElementById('recognized-text').textContent = 'Höre zu...';        };        recognition.onresult = function(event) {            const transcript = event.results[0][0].transcript;            document.getElementById('recognized-text').textContent = transcript;            // Sobald Text erkannt wurde, wird die Übersetzung ausgelöst            translateText(transcript, 'en');  // Übersetzen nach Englisch, passe die Zielsprache an        };        recognition.onend = function() {            recognizing = false;        };        recognition.onerror = function(event) {            console.error('Spracherkennung Fehler:', event.error);            recognizing = false;        };        recognition.start();    } else {        recognition.stop();    }});function translateText(text, targetLanguage) {    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLanguage}&dt=t&q=${encodeURI(text)}`;    fetch(url)        .then(response => response.json())        .then(data => {            const translatedText = data[0][0][0];            document.getElementById('translated-text').innerText = translatedText;        })        .catch(error => console.error('Fehler bei der Übersetzung:', error));}</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countdown Timer</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            font-size: 2rem;
+        }
+
+        .timer {
+            text-align: center;
+        }
+
+        .timer div {
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="timer">
+        <div id="months">0 Months</div>
+        <div id="days">0 Days</div>
+        <div id="hours">0 Hours</div>
+        <div id="minutes">0 Minutes</div>
+        <div id="seconds">0 Seconds</div>
+    </div>
+
+    <script>
+        function countdown() {
+            const targetDate = new Date('November 1, 2024 00:00:00').getTime();
+            const now = new Date().getTime();
+            const timeDifference = targetDate - now;
+
+            if (timeDifference <= 0) {
+                clearInterval(interval);
+                document.querySelector('.timer').innerHTML = "Time's up!";
+                return;
+            }
+
+            const months = Math.floor(timeDifference / (1000 * 60 * 60 * 24 * 30));
+            const days = Math.floor((timeDifference % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+
+            document.getElementById('months').innerHTML = months + " Months";
+            document.getElementById('days').innerHTML = days + " Days";
+            document.getElementById('hours').innerHTML = hours + " Hours";
+            document.getElementById('minutes').innerHTML = minutes + " Minutes";
+            document.getElementById('seconds').innerHTML = seconds + " Seconds";
+        }
+
+        const interval = setInterval(countdown, 1000);
+    </script>
+</body>
+</html>
