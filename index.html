@@ -15,25 +15,17 @@
             background-color: #000;
             color: #fff;
             font-family: Arial, sans-serif;
-            font-size: 2rem;
+            font-size: 3rem;
         }
 
         .timer {
             text-align: center;
         }
-
-        .timer div {
-            margin: 10px;
-        }
     </style>
 </head>
 <body>
-    <div class="timer">
-        <div id="months">0 Months</div>
-        <div id="days">0 Days</div>
-        <div id="hours">0 Hours</div>
-        <div id="minutes">0 Minutes</div>
-        <div id="seconds">0 Seconds</div>
+    <div class="timer" id="timer">
+        00:00:00:00:00
     </div>
 
     <script>
@@ -44,7 +36,7 @@
 
             if (timeDifference <= 0) {
                 clearInterval(interval);
-                document.querySelector('.timer').innerHTML = "Time's up!";
+                document.getElementById('timer').innerHTML = "00:00:00:00:00";
                 return;
             }
 
@@ -54,11 +46,12 @@
             const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
 
-            document.getElementById('months').innerHTML = months + " Months";
-            document.getElementById('days').innerHTML = days + " Days";
-            document.getElementById('hours').innerHTML = hours + " Hours";
-            document.getElementById('minutes').innerHTML = minutes + " Minutes";
-            document.getElementById('seconds').innerHTML = seconds + " Seconds";
+            document.getElementById('timer').innerHTML = 
+                (months < 10 ? '0' + months : months) + ":" +
+                (days < 10 ? '0' + days : days) + ":" +
+                (hours < 10 ? '0' + hours : hours) + ":" +
+                (minutes < 10 ? '0' + minutes : minutes) + ":" +
+                (seconds < 10 ? '0' + seconds : seconds);
         }
 
         const interval = setInterval(countdown, 1000);
