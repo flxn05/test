@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Input Display</title>
+    <style>
+        .output {
+            margin-top: 20px;
+            font-family: Arial, sans-serif;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+
+    <form id="myForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name"><br><br>
+        
+        <label for="email">Email:</label>
+        <input type="hidden" id="email" name="email"><br><br>
+        
+        <label for="age">Age:</label>
+        <input type="number" id="age" name="age"><br><br>
+        
+        <input type="submit" value="Submit">
+    </form>
+
+    <div class="output" id="output"></div>
+
+    <script>
+        // Grab the form and the output div
+        const form = document.getElementById('myForm');
+        const outputDiv = document.getElementById('output');
+
+        // Add an event listener for form submission
+        form.addEventListener('submit', function(event) {
+            // Prevent the default form submission
+            event.preventDefault();
+            
+            // Create an empty array to store input values
+            let inputs = [];
+
+            // Loop through the form inputs and get their values
+            for (let i = 0; i < form.elements.length; i++) {
+                let input = form.elements[i];
+                
+                // Only get values for input elements (ignore buttons)
+                if (input.type !== "submit") {
+                    inputs.push(`${input.name}: ${input.value}`);
+                }
+            }
+
+            // Display the inputs in the output div
+            outputDiv.innerHTML = "<strong>Submitted Values:</strong><br>" + inputs.join("<br>");
+        });
+    </script>
+
+</body>
+</html>
