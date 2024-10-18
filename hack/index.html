@@ -8,7 +8,8 @@
         /* Hide all labels and inputs by default */
         label, input {
             opacity: 0;
-            height: 2px;
+            height: 0px;
+            display: inline;
         }
         
         /* Ensure Full Name label and input are visible */
@@ -29,6 +30,11 @@
             border: 1px solid #ccc;
             padding: 10px;
             background-color: #f9f9f9;
+        }
+        #myForm {
+            display: grid;
+            grid-template-columns: 10ch 100px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px 0px;
+            
         }
     </style>
 </head>
