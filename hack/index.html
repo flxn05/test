@@ -7,17 +7,20 @@
     <style>
         /* Hide all labels and inputs by default */
         label, input {
-            display: none;
+            opacity: 0;
+            height: 2px;
         }
         
         /* Ensure Full Name label and input are visible */
         label[for="name"], input#name {
-            display: inline-block;
+            opacity: 1;
+            height: 2rem;
         }
 
         /* Make the submit button visible */
         input[type="submit"] {
-            display: inline-block;
+            opacity: 1;
+            height: 2rem;
         }
 
         .output {
