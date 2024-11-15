@@ -1,1 +1,145 @@
-<input type="file" id="galleryInput" accept="image/*" multiple />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+
+        #video {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .output {
+            margin-top: 10px;
+        }
+
+        video, img {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <video id="video" autoplay muted></video>
+    <canvas id="canvas"></canvas>
+    <div class="controls">
+        <button id="capturePhoto">Capture Photo</button>
+        <button id="startRecording">Start Recording</button>
+        <button id="stopRecording" disabled>Stop Recording</button>
+        <a id="downloadLink" style="display:none;">Download</a>
+    </div>
+    <div class="output" id="output"></div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const capturePhotoBtn = document.getElementById('capturePhoto');
+        const startRecordingBtn = document.getElementById('startRecording');
+        const stopRecordingBtn = document.getElementById('stopRecording');
+        const downloadLink = document.getElementById('downloadLink');
+        const output = document.getElementById('output');
+
+        let mediaStream;
+        let mediaRecorder;
+        let recordedChunks = [];
+
+        async function startCamera() {
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                video.srcObject = mediaStream;
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+            }
+        }
+
+        capturePhotoBtn.addEventListener('click', () => {
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const img = document.createElement('img');
+            img.src = canvas.toDataURL('image/png');
+            output.innerHTML = '';
+            output.appendChild(img);
+        });
+
+        startRecordingBtn.addEventListener('click', () => {
+            recordedChunks = [];
+            mediaRecorder = new MediaRecorder(mediaStream);
+
+            mediaRecorder.ondataavailable = event => {
+                if (event.data.size > 0) {
+                    recordedChunks.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+
+                const videoElement = document.createElement('video');
+                videoElement.controls = true;
+                videoElement.src = url;
+                output.innerHTML = '';
+                output.appendChild(videoElement);
+
+                downloadLink.href = url;
+                downloadLink.download = 'recorded-video.webm';
+                downloadLink.style.display = 'block';
+                downloadLink.textContent = 'Download Video';
+            };
+
+            mediaRecorder.start();
+            startRecordingBtn.disabled = true;
+            stopRecordingBtn.disabled = false;
+        });
+
+        stopRecordingBtn.addEventListener('click', () => {
+            mediaRecorder.stop();
+            startRecordingBtn.disabled = false;
+            stopRecordingBtn.disabled = true;
+        });
+
+        startCamera();
+    </script>
+</body>
+</html>
