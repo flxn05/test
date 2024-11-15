@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Camera App</title>
+    <title>WhatsApp-Themed Camera App</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,7 +13,7 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #f0f0f0;
+            background-color: #e9f7ef; /* WhatsApp green background color */
         }
 
         #video {
@@ -21,6 +21,7 @@
             max-width: 600px;
             border-radius: 10px;
             margin-bottom: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
 
         #canvas {
@@ -34,16 +35,48 @@
 
         button {
             padding: 10px;
-            background-color: #007bff;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 50%;
             cursor: pointer;
             font-size: 16px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        button:hover {
-            background-color: #0056b3;
+        #capturePhoto {
+            background-color: #25d366; /* WhatsApp green color */
+        }
+
+        #capturePhoto:hover {
+            background-color: #1da951;
+        }
+
+        #startRecording {
+            background-color: #ff3b30; /* Red for recording */
+        }
+
+        #startRecording:hover {
+            background-color: #d32f2f;
+        }
+
+        #stopRecording {
+            background-color: #ffc107; /* Amber for stop */
+        }
+
+        #stopRecording:hover {
+            background-color: #ffa000;
+        }
+
+        #shareMedia {
+            background-color: #128c7e; /* WhatsApp darker green for share */
+        }
+
+        #shareMedia:hover {
+            background-color: #0e7b6b;
         }
 
         .output {
@@ -54,6 +87,7 @@
             width: 100%;
             max-width: 600px;
             border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
@@ -61,10 +95,10 @@
     <video id="video" autoplay muted></video>
     <canvas id="canvas"></canvas>
     <div class="controls">
-        <button id="capturePhoto">Capture Photo</button>
-        <button id="startRecording">Start Recording</button>
-        <button id="stopRecording" disabled>Stop Recording</button>
-        <a id="downloadLink" style="display:none;">Download</a>
+        <button id="capturePhoto" title="Capture Photo">📸</button>
+        <button id="startRecording" title="Start Recording">🔴</button>
+        <button id="stopRecording" title="Stop Recording" disabled>⏹</button>
+        <button id="shareMedia" title="Share Media" disabled>📤</button>
     </div>
     <div class="output" id="output"></div>
 
@@ -74,16 +108,17 @@
         const capturePhotoBtn = document.getElementById('capturePhoto');
         const startRecordingBtn = document.getElementById('startRecording');
         const stopRecordingBtn = document.getElementById('stopRecording');
-        const downloadLink = document.getElementById('downloadLink');
+        const shareMediaBtn = document.getElementById('shareMedia');
         const output = document.getElementById('output');
 
         let mediaStream;
         let mediaRecorder;
         let recordedChunks = [];
+        let lastCapturedBlob;
 
         async function startCamera() {
             try {
-                mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: true });
                 video.srcObject = mediaStream;
             } catch (err) {
                 console.error('Error accessing camera:', err);
@@ -97,9 +132,13 @@
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
             const img = document.createElement('img');
-            img.src = canvas.toDataURL('image/png');
+            const imageData = canvas.toDataURL('image/png');
+            img.src = imageData;
             output.innerHTML = '';
             output.appendChild(img);
+
+            lastCapturedBlob = dataURLToBlob(imageData);
+            enableShare();
         });
 
         startRecordingBtn.addEventListener('click', () => {
@@ -113,8 +152,8 @@
             };
 
             mediaRecorder.onstop = () => {
-                const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                const url = URL.createObjectURL(blob);
+                lastCapturedBlob = new Blob(recordedChunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(lastCapturedBlob);
 
                 const videoElement = document.createElement('video');
                 videoElement.controls = true;
@@ -122,10 +161,7 @@
                 output.innerHTML = '';
                 output.appendChild(videoElement);
 
-                downloadLink.href = url;
-                downloadLink.download = 'recorded-video.webm';
-                downloadLink.style.display = 'block';
-                downloadLink.textContent = 'Download Video';
+                enableShare();
             };
 
             mediaRecorder.start();
@@ -138,6 +174,41 @@
             startRecordingBtn.disabled = false;
             stopRecordingBtn.disabled = true;
         });
+
+        shareMediaBtn.addEventListener('click', async () => {
+            if (!lastCapturedBlob) return;
+
+            const file = new File([lastCapturedBlob], 'media.webm', { type: lastCapturedBlob.type });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Shared from Camera App',
+                        text: 'Check this out!',
+                    });
+                    alert('Media shared successfully!');
+                } catch (err) {
+                    console.error('Error sharing:', err);
+                }
+            } else {
+                alert('Sharing not supported on this browser.');
+            }
+        });
+
+        function enableShare() {
+            shareMediaBtn.disabled = false;
+        }
+
+        function dataURLToBlob(dataURL) {
+            const parts = dataURL.split(',');
+            const mime = parts[0].match(/:(.*?);/)[1];
+            const binary = atob(parts[1]);
+            const array = [];
+            for (let i = 0; i < binary.length; i++) {
+                array.push(binary.charCodeAt(i));
+            }
+            return new Blob([new Uint8Array(array)], { type: mime });
+        }
 
         startCamera();
     </script>
