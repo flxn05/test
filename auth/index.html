@@ -4,69 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Passkey Authentication</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding-top: 50px; }
+        button { padding: 10px 20px; font-size: 16px; }
+        input { padding: 10px 20px; font-size: 16px; margin: 10px 0; }
+    </style>
 </head>
 <body>
     <h1>Passkey Authentication</h1>
-
-    <button id="registerBtn">Register Passkey</button>
-    <button id="loginBtn">Login with Passkey</button>
-
+    <div>
+        <button id="registerButton">Register Passkey</button>
+        <button id="loginButton">Login with Passkey</button>
+    </div>
     <div id="status"></div>
 
-    <script>
-        // Check if the browser supports WebAuthn (Passkeys)
-        if (!window.PublicKeyCredential) {
-            document.getElementById('status').innerText = 'WebAuthn not supported on this browser.';
-        }
-
-        const registerBtn = document.getElementById('registerBtn');
-        const loginBtn = document.getElementById('loginBtn');
-
-        // Function to handle registration of a passkey
-        async function registerPasskey() {
-            const response = await fetch('/register', { method: 'POST' });
-            const publicKeyCredentialCreationOptions = await response.json();
-
-            try {
-                const credential = await navigator.credentials.create({ publicKey: publicKeyCredentialCreationOptions });
-
-                // Send the registration result to the server to store it
-                await fetch('/register', {
-                    method: 'PUT',
-                    body: JSON.stringify({ credential: credential }),
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                document.getElementById('status').innerText = 'Registration successful!';
-            } catch (error) {
-                document.getElementById('status').innerText = `Registration failed: ${error}`;
-            }
-        }
-
-        // Function to handle login with a passkey
-        async function loginPasskey() {
-            const response = await fetch('/login', { method: 'POST' });
-            const publicKeyCredentialRequestOptions = await response.json();
-
-            try {
-                const credential = await navigator.credentials.get({ publicKey: publicKeyCredentialRequestOptions });
-
-                // Send the login result to the server for validation
-                await fetch('/login', {
-                    method: 'PUT',
-                    body: JSON.stringify({ credential: credential }),
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                document.getElementById('status').innerText = 'Login successful!';
-            } catch (error) {
-                document.getElementById('status').innerText = `Login failed: ${error}`;
-            }
-        }
-
-        // Event listeners for the buttons
-        registerBtn.addEventListener('click', registerPasskey);
-        loginBtn.addEventListener('click', loginPasskey);
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
