@@ -18,18 +18,28 @@ function arrayBufferToBase64(buffer) {
     return btoa(binaryString).replace(/\//g, '_').replace(/\+/g, '-');
 }
 
+// Generate a random Uint8Array
+function generateRandomBuffer(length) {
+    let buffer = new Uint8Array(length);
+    crypto.getRandomValues(buffer);
+    return buffer.buffer;
+}
+
 // Register Passkey
 document.getElementById('registerButton').addEventListener('click', async () => {
     try {
         const options = {
-            challenge: new Uint8Array(32).buffer, // Properly use ArrayBuffer
-            rp: { name: "Passkey Demo" },
+            challenge: generateRandomBuffer(32), // Proper random challenge
+            rp: { name: "Passkey Demo", id: window.location.hostname },
             user: {
-                id: new Uint8Array(16), // Must be a Uint8Array
+                id: generateRandomBuffer(16), // Unique and persistent user ID
                 name: "user@example.com",
                 displayName: "User"
             },
-            pubKeyCredParams: [{ type: "public-key", alg: -7 }],
+            pubKeyCredParams: [
+                { type: "public-key", alg: -7 },  // ES256 (Elliptic Curve)
+                { type: "public-key", alg: -257 } // RS256 (RSA)
+            ],
             authenticatorSelection: {
                 authenticatorAttachment: "platform",
                 userVerification: "preferred"
@@ -59,7 +69,7 @@ document.getElementById('loginButton').addEventListener('click', async () => {
         }
 
         const options = {
-            challenge: new Uint8Array(32).buffer, // Properly use ArrayBuffer
+            challenge: generateRandomBuffer(32), // Proper random challenge
             allowCredentials: [{
                 type: "public-key",
                 id: base64ToArrayBuffer(storedPasskey) // Convert back to ArrayBuffer
