@@ -7,25 +7,15 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="login-container">
-        <h1>Secure Login</h1>
-        <p>Please authenticate to continue.</p>
-
-        <input type="text" id="username" placeholder="Username">
-        
-        <button id="authButton">Authenticate</button>
-
-        <div class="loading-bar" id="loadingBar"></div>
-
-        <p id="message"></p>
-    </div>
-
-    <!-- Success Popup -->
-    <div class="popup" id="successPopup">
-        <h2>Access Granted</h2>
-        <p>Welcome back!</p>
-    </div>
-
+    <h1>🔐 Secure Login</h1>
+    <p>Authenticate using your device's biometric sensor.</p>
+    
+    <button id="registerBtn">Register Passkey</button>
+    <button id="authBtn">Authenticate</button>
+    
+    <p id="status"></p>
+    <div class="loader" id="loading" style="display: none;"></div>
+    
     <script src="script.js"></script>
 </body>
 </html>
