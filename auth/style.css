@@ -1,47 +1,106 @@
+/* Google Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    font-family: 'Inter', sans-serif;
+    background: #121212;
+    color: white;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    margin: 0;
-    color: white;
+    transition: background 0.3s;
 }
 
-.container {
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
+.login-container {
+    background: rgba(20, 20, 20, 0.9);
     padding: 30px;
-    border-radius: 15px;
+    border-radius: 12px;
     text-align: center;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    width: 320px;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+    transition: 0.3s;
 }
 
-button {
-    background: rgba(255, 255, 255, 0.3);
+/* Input Fields */
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
     border: none;
-    padding: 15px 20px;
-    font-size: 18px;
+    border-radius: 8px;
+    background: #1e1e1e;
     color: white;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    font-size: 16px;
+}
+
+/* Button */
+button {
+    background: #007BFF;
+    color: white;
+    border: none;
+    padding: 12px;
+    font-size: 18px;
     cursor: pointer;
+    width: 100%;
+    border-radius: 8px;
     transition: 0.3s;
 }
 
 button:hover {
-    background: rgba(255, 255, 255, 0.5);
+    background: #0056b3;
 }
 
-button img {
-    width: 24px;
-    height: 24px;
+/* Loading Bar */
+.loading-bar {
+    width: 100%;
+    height: 4px;
+    background: #007BFF;
+    margin-top: 10px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 2s ease-in-out;
 }
 
-p {
-    margin-top: 20px;
-    font-size: 18px;
+/* Greyscale Effect */
+.greyscale {
+    filter: grayscale(100%);
+}
+
+/* Error Animation */
+.error {
+    background: rgba(255, 0, 0, 0.2);
+    animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+
+/* Success Popup */
+.popup {
+    position: fixed;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #007BFF;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    transition: top 0.5s ease-in-out;
+}
+
+.show-popup {
+    top: 50px;
 }
