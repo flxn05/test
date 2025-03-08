@@ -6,6 +6,12 @@ body {
     transition: all 0.3s ease-in-out;
 }
 
+.container {
+    max-width: 400px;
+    margin: auto;
+    padding: 20px;
+}
+
 button {
     background-color: #1e88e5;
     color: white;
@@ -61,6 +67,7 @@ button:hover {
     height: 40px;
     animation: spin 1s linear infinite;
     margin: 20px auto;
+    display: none;
 }
 
 @keyframes spin {
