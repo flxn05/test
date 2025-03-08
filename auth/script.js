@@ -1,3 +1,4 @@
+console.log('2nd 11:07')
 document.getElementById("authButton").addEventListener("click", async function () {
     if (!window.PublicKeyCredential) {
         document.getElementById("message").innerText = "WebAuthn wird nicht unterstützt 😞";
