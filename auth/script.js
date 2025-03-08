@@ -5,10 +5,13 @@ document.getElementById("authButton").addEventListener("click", async function (
     }
 
     try {
+        // Windows Hello explizit verwenden ohne Passkeys
         const credential = await navigator.credentials.get({
             publicKey: {
                 challenge: new Uint8Array(32),
-                userVerification: "required"
+                allowCredentials: [],
+                userVerification: "required",
+                authenticatorSelection: { authenticatorAttachment: "platform" } // Nutzt Windows Hello direkt
             }
         });
 
