@@ -1,21 +1,31 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fingerabdruck-Login</title>
+    <title>Secure Login</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Willkommen 👋</h1>
-        <p>Bitte bestätigen Sie Ihre Identität mit Fingerabdruck oder Face ID</p>
-        <button id="authButton">
-            <img src="fingerprint.svg" alt="Fingerprint Icon"> Login mit Fingerabdruck
-        </button>
+    <div class="login-container">
+        <h1>Secure Login</h1>
+        <p>Please authenticate to continue.</p>
+
+        <input type="text" id="username" placeholder="Username">
+        
+        <button id="authButton">Authenticate</button>
+
+        <div class="loading-bar" id="loadingBar"></div>
+
         <p id="message"></p>
     </div>
-    
+
+    <!-- Success Popup -->
+    <div class="popup" id="successPopup">
+        <h2>Access Granted</h2>
+        <p>Welcome back!</p>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
