@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Native Share .cba File</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 50px;
+    }
+    button {
+      font-size: 1.2em;
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Share CBA File</h1>
+  <button id="shareBtn">📤 Share details.cba</button>
+
+  <script>
+    const shareBtn = document.getElementById('shareBtn');
+
+    shareBtn.addEventListener('click', async () => {
+      // Create a sample .cba file as a Blob
+      const fileContent = "This is a sample .cba file content.";
+      const file = new File([fileContent], "details.cba", {
+        type: "application/octet-stream"
+      });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: "Share CBA File",
+            text: "Here's the details.cba file.",
+            files: [file]
+          });
+          alert("File shared successfully!");
+        } catch (error) {
+          alert("Share failed: " + error);
+        }
+      } else {
+        alert("Native file sharing not supported on this device/browser.");
+      }
+    });
+  </script>
+
+</body>
+</html>
