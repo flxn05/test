@@ -1,22 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Native Share Button</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advanced Native Share</title>
   <style>
     body {
       font-family: sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background: #f4f4f4;
+      background: #f0f0f5;
+      padding: 50px;
+      text-align: center;
     }
 
-    #shareBtn {
-      padding: 15px 30px;
-      font-size: 18px;
+    h1 {
+      margin-bottom: 30px;
+    }
+
+    button {
+      padding: 15px 25px;
+      margin: 10px;
+      font-size: 16px;
       border: none;
       border-radius: 8px;
       background-color: #007bff;
@@ -24,17 +27,129 @@
       cursor: pointer;
     }
 
-    #shareBtn:disabled {
-      background-color: #999;
+    button:disabled {
+      background-color: #888;
       cursor: not-allowed;
+    }
+
+    #share-result {
+      margin-top: 20px;
+      color: green;
+    }
+
+    #capture-area {
+      margin-top: 40px;
+      padding: 20px;
+      background-color: white;
+      border: 1px solid #ccc;
     }
   </style>
 </head>
 <body>
 
-  <button id="shareBtn">🔗 Share This Page</button>
+  <h1>📤 Native Share Demo</h1>
+
+  <button id="basicShareBtn">🔗 Share This Page</button>
+  <button id="fileShareBtn">📎 Share a Text File</button>
+  <button id="imageShareBtn">🖼️ Share Screenshot (Experimental)</button>
+
+  <div id="share-result"></div>
+
+  <!-- Content to capture -->
+  <div id="capture-area">
+    <h2>This is a capture area</h2>
+    <p>This part will be turned into an image and shared.</p>
+  </div>
+
+  <!-- html2canvas for screenshot capture -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
   <script>
+    const basicShareBtn = document.getElementById('basicShareBtn');
+    const fileShareBtn = document.getElementById('fileShareBtn');
+    const imageShareBtn = document.getElementById('imageShareBtn');
+    const result = document.getElementById('share-result');
+
+    const isWebShareSupported = !!navigator.share;
+    const isFileShareSupported = navigator.canShare && navigator.canShare({ files: [new File(["test"], "test.txt", { type: "text/plain" })] });
+
+    // ✅ Basic Share
+    if (isWebShareSupported) {
+      basicShareBtn.addEventListener('click', async () => {
+        try {
+          await navigator.share({
+            title: document.title,
+            text: "Check out this awesome page!",
+            url: window.location.href,
+          });
+          result.textContent = "✅ Shared successfully!";
+        } catch (err) {
+          console.error(err);
+          result.textContent = "❌ Sharing canceled or failed.";
+        }
+      });
+    } else {
+      basicShareBtn.disabled = true;
+      basicShareBtn.textContent = "🔗 Share Not Supported";
+    }
+
+    // 📎 File Share
+    if (isFileShareSupported) {
+      fileShareBtn.addEventListener('click', async () => {
+        const content = `Shared from: ${window.location.href}\nDate: ${new Date().toLocaleString()}`;
+        const file = new File([content], "shared-info.txt", { type: "text/plain" });
+
+        try {
+          await navigator.share({
+            title: "Here's a text file",
+            text: "Sharing some data...",
+            files: [file],
+          });
+          result.textContent = "✅ File shared successfully!";
+        } catch (err) {
+          console.error(err);
+          result.textContent = "❌ File sharing failed or canceled.";
+        }
+      });
+    } else {
+      fileShareBtn.disabled = true;
+      fileShareBtn.textContent = "📎 File Share Not Supported";
+    }
+
+    // 🖼️ Image Share (Screenshot)
+    imageShareBtn.addEventListener('click', async () => {
+      if (!navigator.canShare || !navigator.canShare({ files: [] })) {
+        imageShareBtn.disabled = true;
+        imageShareBtn.textContent = "🖼️ Screenshot Share Not Supported";
+        return;
+      }
+
+      result.textContent = "⏳ Capturing screenshot...";
+
+      try {
+        const canvas = await html2canvas(document.getElementById('capture-area'));
+        canvas.toBlob(async (blob) => {
+          const file = new File([blob], "screenshot.png", { type: "image/png" });
+
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: "Shared Screenshot",
+              text: "Here's a screenshot from the page!",
+              files: [file],
+            });
+            result.textContent = "✅ Screenshot shared!";
+          } else {
+            result.textContent = "❌ Cannot share this file.";
+          }
+        }, 'image/png');
+      } catch (err) {
+        console.error(err);
+        result.textContent = "❌ Failed to capture or share.";
+      }
+    });
+  </script>
+</body>
+</html>  <script>
     const shareBtn = document.getElementById('shareBtn');
 
     // Check if Web Share API is supported
