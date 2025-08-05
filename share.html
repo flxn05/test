@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Native Share Button</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #f4f4f4;
+    }
+
+    #shareBtn {
+      padding: 15px 30px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+
+    #shareBtn:disabled {
+      background-color: #999;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+  <button id="shareBtn">🔗 Share This Page</button>
+
+  <script>
+    const shareBtn = document.getElementById('shareBtn');
+
+    // Check if Web Share API is supported
+    if (navigator.share) {
+      shareBtn.addEventListener('click', async () => {
+        try {
+          await navigator.share({
+            title: document.title,
+            text: 'Check this out!',
+            url: window.location.href,
+          });
+          console.log('Content shared successfully');
+        } catch (err) {
+          console.error('Error sharing:', err);
+        }
+      });
+    } else {
+      shareBtn.textContent = "Sharing Not Supported";
+      shareBtn.disabled = true;
+    }
+  </script>
+
+</body>
+</html>
