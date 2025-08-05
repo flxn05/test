@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Advanced Native Share</title>
+  <title>Custom File Share Demo</title>
   <style>
     body {
-      font-family: sans-serif;
-      background: #f0f0f5;
-      padding: 50px;
+      font-family: monospace;
+      background: #1e1e2f;
+      color: #fff;
+      padding: 60px 20px;
       text-align: center;
     }
 
@@ -17,24 +18,123 @@
     }
 
     button {
-      padding: 15px 25px;
-      margin: 10px;
+      padding: 14px 28px;
+      margin: 12px;
       font-size: 16px;
       border: none;
-      border-radius: 8px;
-      background-color: #007bff;
+      border-radius: 6px;
+      background-color: #5e5eff;
       color: white;
       cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #7878ff;
     }
 
     button:disabled {
-      background-color: #888;
+      background-color: #444;
       cursor: not-allowed;
     }
 
     #share-result {
-      margin-top: 20px;
-      color: green;
+      margin-top: 25px;
+      color: #00ff9f;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📤 Share a Preset</h1>
+
+  <button id="basicShareBtn">🔗 Share This Page</button>
+  <button id="fileShareBtn">🎹 Share .c#4.giglbs Preset</button>
+
+  <div id="share-result"></div>
+
+  <script>
+    const basicShareBtn = document.getElementById('basicShareBtn');
+    const fileShareBtn = document.getElementById('fileShareBtn');
+    const result = document.getElementById('share-result');
+
+    const isWebShareSupported = !!navigator.share;
+    const isFileShareSupported = navigator.canShare && navigator.canShare({
+      files: [new File(["test"], "example.c#4.giglbs", { type: "application/x-giglbs" })]
+    });
+
+    // 🔗 Basic Share
+    if (isWebShareSupported) {
+      basicShareBtn.addEventListener('click', async () => {
+        try {
+          await navigator.share({
+            title: "GigLBS Preset Share",
+            text: "Check out this custom sound preset!",
+            url: window.location.href,
+          });
+          result.textContent = "✅ Page shared!";
+        } catch (err) {
+          console.error(err);
+          result.textContent = "❌ Sharing canceled or failed.";
+        }
+      });
+    } else {
+      basicShareBtn.disabled = true;
+      basicShareBtn.textContent = "🔗 Share Not Supported";
+    }
+
+    // 🎹 Custom .c#4.giglbs File Share
+    if (isFileShareSupported) {
+      fileShareBtn.addEventListener('click', async () => {
+        const preset = `
+{
+  "presetName": "Astral Echoes",
+  "version": "c#4.2.1",
+  "engine": "GigaLumenBassSynth",
+  "oscillators": [
+    { "type": "sine", "detune": -2, "volume": 0.7 },
+    { "type": "square", "detune": 3, "volume": 0.3 }
+  ],
+  "filters": {
+    "lowpass": { "cutoff": 880, "resonance": 0.42 }
+  },
+  "modMatrix": [
+    { "source": "LFO1", "target": "filter.cutoff", "amount": 0.33 },
+    { "source": "env1", "target": "osc1.pitch", "amount": -0.05 }
+  ],
+  "meta": {
+    "createdBy": "GigLBS AI Composer",
+    "exported": "${new Date().toISOString()}",
+    "url": "${window.location.href}"
+  }
+}
+        `.trim();
+
+        const file = new File([preset], "astral-echoes.c#4.giglbs", {
+          type: "application/x-giglbs"
+        });
+
+        try {
+          await navigator.share({
+            title: "Astral Echoes Preset",
+            text: "Here’s a .giglbs sound patch for your synth!",
+            files: [file],
+          });
+          result.textContent = "✅ Preset shared!";
+        } catch (err) {
+          console.error(err);
+          result.textContent = "❌ Preset sharing canceled or failed.";
+        }
+      });
+    } else {
+      fileShareBtn.disabled = true;
+      fileShareBtn.textContent = "🎹 File Share Not Supported";
+    }
+  </script>
+
+</body>
+</html>      color: green;
     }
 
     #capture-area {
