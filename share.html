@@ -97,7 +97,7 @@
     if (isFileShareSupported) {
       fileShareBtn.addEventListener('click', async () => {
         const content = `Shared from: ${window.location.href}\nDate: ${new Date().toLocaleString()}`;
-        const file = new File([content], "shared-info.txt", { type: "text/plain" });
+        const file = new File([content], "c#7.giglbs", { type: "text/plain" });
 
         try {
           await navigator.share({
