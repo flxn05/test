@@ -42,6 +42,7 @@
       margin-top: 25px;
       color: #00ff9f;
       font-size: 14px;
+      white-space: pre-wrap;
     }
   </style>
 </head>
@@ -64,7 +65,7 @@
       files: [new File(["test"], "example.c#4.giglbs", { type: "application/x-giglbs" })]
     });
 
-    // 🔗 Basic Share
+    // 🔗 Share Page
     if (isWebShareSupported) {
       basicShareBtn.addEventListener('click', async () => {
         try {
@@ -76,7 +77,7 @@
           result.textContent = "✅ Page shared!";
         } catch (err) {
           console.error(err);
-          result.textContent = "❌ Sharing canceled or failed.";
+          result.textContent = "❌ Page sharing canceled or failed.";
         }
       });
     } else {
@@ -84,11 +85,10 @@
       basicShareBtn.textContent = "🔗 Share Not Supported";
     }
 
-    // 🎹 Custom .c#4.giglbs File Share
+    // 🎹 Share Custom File
     if (isFileShareSupported) {
       fileShareBtn.addEventListener('click', async () => {
-        const preset = `
-{
+        const preset = `{
   "presetName": "Astral Echoes",
   "version": "c#4.2.1",
   "engine": "GigaLumenBassSynth",
@@ -108,8 +108,7 @@
     "exported": "${new Date().toISOString()}",
     "url": "${window.location.href}"
   }
-}
-        `.trim();
+}`;
 
         const file = new File([preset], "astral-echoes.c#4.giglbs", {
           type: "application/x-giglbs"
@@ -130,145 +129,6 @@
     } else {
       fileShareBtn.disabled = true;
       fileShareBtn.textContent = "🎹 File Share Not Supported";
-    }
-  </script>
-
-</body>
-</html>      color: green;
-    }
-
-    #capture-area {
-      margin-top: 40px;
-      padding: 20px;
-      background-color: white;
-      border: 1px solid #ccc;
-    }
-  </style>
-</head>
-<body>
-
-  <h1>📤 Native Share Demo</h1>
-
-  <button id="basicShareBtn">🔗 Share This Page</button>
-  <button id="fileShareBtn">📎 Share a Text File</button>
-  <button id="imageShareBtn">🖼️ Share Screenshot (Experimental)</button>
-
-  <div id="share-result"></div>
-
-  <!-- Content to capture -->
-  <div id="capture-area">
-    <h2>This is a capture area</h2>
-    <p>This part will be turned into an image and shared.</p>
-  </div>
-
-  <!-- html2canvas for screenshot capture -->
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-
-  <script>
-    const basicShareBtn = document.getElementById('basicShareBtn');
-    const fileShareBtn = document.getElementById('fileShareBtn');
-    const imageShareBtn = document.getElementById('imageShareBtn');
-    const result = document.getElementById('share-result');
-
-    const isWebShareSupported = !!navigator.share;
-    const isFileShareSupported = navigator.canShare && navigator.canShare({ files: [new File(["test"], "test.txt", { type: "text/plain" })] });
-
-    // ✅ Basic Share
-    if (isWebShareSupported) {
-      basicShareBtn.addEventListener('click', async () => {
-        try {
-          await navigator.share({
-            title: document.title,
-            text: "Check out this awesome page!",
-            url: window.location.href,
-          });
-          result.textContent = "✅ Shared successfully!";
-        } catch (err) {
-          console.error(err);
-          result.textContent = "❌ Sharing canceled or failed.";
-        }
-      });
-    } else {
-      basicShareBtn.disabled = true;
-      basicShareBtn.textContent = "🔗 Share Not Supported";
-    }
-
-    // 📎 File Share
-    if (isFileShareSupported) {
-      fileShareBtn.addEventListener('click', async () => {
-        const content = `Shared from: ${window.location.href}\nDate: ${new Date().toLocaleString()}`;
-        const file = new File([content], "c#7.giglbs", { type: "giglbs/plain" });
-
-        try {
-          await navigator.share({
-            title: "Here's a text file",
-            text: "Sharing some data...",
-            files: [file],
-          });
-          result.textContent = "✅ File shared successfully!";
-        } catch (err) {
-          console.error(err);
-          result.textContent = "❌ File sharing failed or canceled.";
-        }
-      });
-    } else {
-      fileShareBtn.disabled = true;
-      fileShareBtn.textContent = "📎 File Share Not Supported";
-    }
-
-    // 🖼️ Image Share (Screenshot)
-    imageShareBtn.addEventListener('click', async () => {
-      if (!navigator.canShare || !navigator.canShare({ files: [] })) {
-        imageShareBtn.disabled = true;
-        imageShareBtn.textContent = "🖼️ Screenshot Share Not Supported";
-        return;
-      }
-
-      result.textContent = "⏳ Capturing screenshot...";
-
-      try {
-        const canvas = await html2canvas(document.getElementById('capture-area'));
-        canvas.toBlob(async (blob) => {
-          const file = new File([blob], "screenshot.png", { type: "image/png" });
-
-          if (navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              title: "Shared Screenshot",
-              text: "Here's a screenshot from the page!",
-              files: [file],
-            });
-            result.textContent = "✅ Screenshot shared!";
-          } else {
-            result.textContent = "❌ Cannot share this file.";
-          }
-        }, 'image/png');
-      } catch (err) {
-        console.error(err);
-        result.textContent = "❌ Failed to capture or share.";
-      }
-    });
-  </script>
-</body>
-</html>  <script>
-    const shareBtn = document.getElementById('shareBtn');
-
-    // Check if Web Share API is supported
-    if (navigator.share) {
-      shareBtn.addEventListener('click', async () => {
-        try {
-          await navigator.share({
-            title: document.title,
-            text: 'Check this out!',
-            url: window.location.href,
-          });
-          console.log('Content shared successfully');
-        } catch (err) {
-          console.error('Error sharing:', err);
-        }
-      });
-    } else {
-      shareBtn.textContent = "Sharing Not Supported";
-      shareBtn.disabled = true;
     }
   </script>
 
