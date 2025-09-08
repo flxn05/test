@@ -22,10 +22,6 @@
   #brightness {
     font-size: 1.5em;
   }
-  #threshold {
-    font-size: 1.2em;
-    margin-bottom: 1em;
-  }
   video {
     display: none; /* hide camera feed */
   }
@@ -34,9 +30,8 @@
 <body>
 <h1 id="headline">Ambient is Light/Dark</h1>
 <div id="brightness">Brightness: 0</div>
-<div id="threshold">Target: 120</div>
+<div id="threshold">Target: 100</div>
 <video id="video" autoplay playsinline></video>
-
 <script>
 (async () => {
   const video = document.getElementById('video');
@@ -44,7 +39,8 @@
   const brightnessDisplay = document.getElementById('brightness');
   const thresholdDisplay = document.getElementById('threshold');
 
-  const targetBrightness = 120;
+  // Threshold for switching themes
+  const targetBrightness = 100; // adjust as needed
   thresholdDisplay.textContent = `Target: ${targetBrightness}`;
 
   // Access front camera
@@ -60,61 +56,58 @@
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
 
-  function getPerceivedBrightness(frame) {
+  function getAverageBrightness(frame) {
     const length = frame.data.length / 4;
     let total = 0;
+    let rSum = 0, gSum = 0, bSum = 0;
     for (let i = 0; i < frame.data.length; i += 4) {
       const r = frame.data[i];
       const g = frame.data[i + 1];
       const b = frame.data[i + 2];
-      // Perceived brightness formula
-      const brightness = 0.299*r + 0.587*g + 0.114*b;
-      total += brightness;
+      total += (r + g + b) / 3;
+      rSum += r;
+      gSum += g;
+      bSum += b;
     }
-    return total / length;
+    const avg = total / length;
+    return {
+      brightness: avg,
+      r: rSum / length,
+      g: gSum / length,
+      b: bSum / length
+    };
   }
 
-  async function captureAndComputeAverage() {
-    const captureTime = 3000; // 3 seconds
-    const interval = 200; // capture every 200ms
-    const frames = [];
-    const start = Date.now();
+  function update() {
+    if (video.readyState >= 2) {
+      canvas.width = video.videoWidth / 4; // reduce resolution for performance
+      canvas.height = video.videoHeight / 4;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const avg = getAverageBrightness(frame);
 
-    while (Date.now() - start < captureTime) {
-      if (video.readyState >= 2) {
-        canvas.width = video.videoWidth / 4; // downsample for performance
-        canvas.height = video.videoHeight / 4;
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const brightness = getPerceivedBrightness(frame);
-        frames.push(brightness);
-      }
-      await new Promise(resolve => setTimeout(resolve, interval));
-    }
+      brightnessDisplay.textContent = `Brightness: ${Math.round(avg.brightness)}`;
 
-    const avgBrightness = frames.reduce((a,b) => a+b, 0) / frames.length;
-    return avgBrightness;
-  }
+      // Tint based on average color (orange/teal)
+      const orangeScore = avg.r - avg.b;
+      const tealScore = avg.b - avg.r;
+      let tint = 'transparent';
+      if (orangeScore > 40) tint = 'rgba(255,165,0,0.2)';
+      if (tealScore > 40) tint = 'rgba(0,128,128,0.2)';
 
-  async function monitorAmbientLight() {
-    const avgBrightness = await captureAndComputeAverage();
-    brightnessDisplay.textContent = `Brightness: ${Math.round(avgBrightness)}`;
+      document.body.style.backgroundColor = avg.brightness < targetBrightness ? '#111' : '#fff';
+      document.body.style.color = avg.brightness < targetBrightness ? '#fff' : '#000';
+      headline.textContent = avg.brightness < targetBrightness ? 'Ambient is Dark' : 'Ambient is Light';
+      document.body.style.backgroundColor = avg.brightness < targetBrightness ? `#111` : `#fff`;
+      document.body.style.backgroundColor = `linear-gradient(${tint}, ${avg.brightness < targetBrightness ? '#111' : '#fff'})`;
 
-    if (avgBrightness < targetBrightness) {
-      document.body.style.backgroundColor = '#111';
-      document.body.style.color = '#fff';
-      headline.textContent = 'Ambient is Dark';
+      requestAnimationFrame(update);
     } else {
-      document.body.style.backgroundColor = '#fff';
-      document.body.style.color = '#000';
-      headline.textContent = 'Ambient is Light';
+      requestAnimationFrame(update);
     }
-
-    // Wait 2 seconds before next capture
-    setTimeout(monitorAmbientLight, 2000);
   }
 
-  monitorAmbientLight();
+  update();
 })();
 </script>
 </body>
