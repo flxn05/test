@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ambient Theme Switcher</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    transition: background-color 0.5s, color 0.5s;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0;
+  }
+  #headline {
+    font-size: 2em;
+    margin-bottom: 1em;
+  }
+  #brightness {
+    font-size: 1.5em;
+  }
+  #threshold {
+    font-size: 1.2em;
+    margin-bottom: 1em;
+  }
+  video {
+    display: none; /* hide camera feed */
+  }
+</style>
+</head>
+<body>
+<h1 id="headline">Ambient is Light/Dark</h1>
+<div id="brightness">Brightness: 0</div>
+<div id="threshold">Target: 120</div>
+<video id="video" autoplay playsinline></video>
+
+<script>
+(async () => {
+  const video = document.getElementById('video');
+  const headline = document.getElementById('headline');
+  const brightnessDisplay = document.getElementById('brightness');
+  const thresholdDisplay = document.getElementById('threshold');
+
+  const targetBrightness = 120;
+  thresholdDisplay.textContent = `Target: ${targetBrightness}`;
+
+  // Access front camera
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+    video.srcObject = stream;
+  } catch (err) {
+    alert('Camera access denied or unavailable');
+    console.error(err);
+    return;
+  }
+
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+
+  function getPerceivedBrightness(frame) {
+    const length = frame.data.length / 4;
+    let total = 0;
+    for (let i = 0; i < frame.data.length; i += 4) {
+      const r = frame.data[i];
+      const g = frame.data[i + 1];
+      const b = frame.data[i + 2];
+      // Perceived brightness formula
+      const brightness = 0.299*r + 0.587*g + 0.114*b;
+      total += brightness;
+    }
+    return total / length;
+  }
+
+  async function captureAndComputeAverage() {
+    const captureTime = 3000; // 3 seconds
+    const interval = 200; // capture every 200ms
+    const frames = [];
+    const start = Date.now();
+
+    while (Date.now() - start < captureTime) {
+      if (video.readyState >= 2) {
+        canvas.width = video.videoWidth / 4; // downsample for performance
+        canvas.height = video.videoHeight / 4;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const brightness = getPerceivedBrightness(frame);
+        frames.push(brightness);
+      }
+      await new Promise(resolve => setTimeout(resolve, interval));
+    }
+
+    const avgBrightness = frames.reduce((a,b) => a+b, 0) / frames.length;
+    return avgBrightness;
+  }
+
+  async function monitorAmbientLight() {
+    const avgBrightness = await captureAndComputeAverage();
+    brightnessDisplay.textContent = `Brightness: ${Math.round(avgBrightness)}`;
+
+    if (avgBrightness < targetBrightness) {
+      document.body.style.backgroundColor = '#111';
+      document.body.style.color = '#fff';
+      headline.textContent = 'Ambient is Dark';
+    } else {
+      document.body.style.backgroundColor = '#fff';
+      document.body.style.color = '#000';
+      headline.textContent = 'Ambient is Light';
+    }
+
+    // Wait 2 seconds before next capture
+    setTimeout(monitorAmbientLight, 2000);
+  }
+
+  monitorAmbientLight();
+})();
+</script>
+</body>
+</html>
