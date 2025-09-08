@@ -13,6 +13,7 @@
       height: 100vh;
       display: flex;
       flex-direction: column;
+      overflow: hidden;
     }
 
     header {
@@ -153,13 +154,12 @@
       color: #0ea5e9;
     }
 
-    /* Fullscreen overlay */
     .fullscreen-overlay {
       position: fixed;
       top: 0;
       left: 0;
-      right: 0;
-      bottom: 0;
+      width: 100%;
+      height: 100%;
       background: white;
       z-index: 100;
       padding: 2rem;
@@ -170,12 +170,6 @@
 
     .fullscreen-overlay.active {
       display: flex;
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
     }
 
     .close-btn {
@@ -229,13 +223,6 @@
     <button>Profile</button>
   </nav>
 
-  <!-- Fullscreen overlay -->
-  <div class="fullscreen-overlay" id="fullscreen">
-    <button class="close-btn" id="close-btn">×</button>
-    <h1>Wellness Tracker</h1>
-    <p>Welcome to your personalized wellness dashboard. Here you can track steps, hydration, and weekly activity trends in detail. More features could be added here in a full app.</p>
-  </div>
-
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const stepsCount = document.getElementById("steps-count");
@@ -276,16 +263,18 @@
         }, i * 150);
       });
 
-      // Fullscreen overlay toggle
+      // Fullscreen API trigger
       const header = document.getElementById("header");
-      const fullscreen = document.getElementById("fullscreen");
-      const closeBtn = document.getElementById("close-btn");
-
-      header.addEventListener("click", () => {
-        fullscreen.classList.add("active");
-      });
-      closeBtn.addEventListener("click", () => {
-        fullscreen.classList.remove("active");
+      header.addEventListener("click", async () => {
+        if (document.documentElement.requestFullscreen) {
+          try {
+            await document.documentElement.requestFullscreen();
+          } catch (err) {
+            console.warn("Fullscreen request failed", err);
+          }
+        } else if (document.documentElement.webkitRequestFullscreen) {
+          document.documentElement.webkitRequestFullscreen();
+        }
       });
     });
   </script>
