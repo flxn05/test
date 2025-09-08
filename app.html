@@ -3,193 +3,48 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Wellness Tracker</title>
+  <title>Wellness Tracker App</title>
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      margin: 0;
-      background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-      color: #0f172a;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+    /* Global Styles */
+    body, html { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); color: #0f172a; height: 100vh; overflow: hidden; }
+    .hidden { display: none; }
 
-    header {
-      padding: 1rem;
-      text-align: center;
-      background: linear-gradient(90deg, #0ea5e9, #38bdf8);
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: white;
-      border-bottom: 1px solid #e2e8f0;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      cursor: pointer;
-    }
+    header { padding: 1rem; text-align: center; background: linear-gradient(90deg, #0ea5e9, #38bdf8); font-size: 1.25rem; font-weight: 600; color: white; cursor: pointer; }
 
-    .dashboard {
-      padding: 1rem;
-      display: grid;
-      gap: 1rem;
-      flex: 1;
-      overflow-y: auto;
-    }
+    nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 0.75rem 0; border-top: 1px solid #e2e8f0; }
+    nav button { background: none; border: none; font-size: 0.9rem; font-weight: 500; color: #64748b; }
+    nav button.active { color: #0ea5e9; }
 
-    .card {
-      background: white;
-      border-radius: 1.25rem;
-      padding: 1rem;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
+    main { padding: 1rem; height: calc(100vh - 104px); overflow-y: auto; }
+    .card { background: white; border-radius: 1.25rem; padding: 1rem; box-shadow: 0 4px 14px rgba(0,0,0,0.08); margin-bottom: 1rem; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+    .card h2 { margin: 0 0 0.5rem; font-size: 1rem; font-weight: 600; }
 
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-    }
+    .stats { display: flex; justify-content: space-between; align-items: center; }
+    .stats-value { font-size: 1.5rem; font-weight: 700; background: linear-gradient(90deg, #0ea5e9, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .progress-bar { width: 100%; height: 10px; border-radius: 5px; background: #e2e8f0; margin-top: 0.5rem; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #4ade80, #22c55e); width: 0%; border-radius: 5px; transition: width 1s ease; }
 
-    .card h2 {
-      margin: 0 0 0.5rem;
-      font-size: 1rem;
-      font-weight: 600;
-    }
+    .chart { width: 100%; height: 150px; display: flex; align-items: flex-end; gap: 6px; }
+    .bar { flex: 1; background: linear-gradient(180deg, #0ea5e9, #38bdf8); border-radius: 4px 4px 0 0; height: 20%; position: relative; transition: height 0.5s ease, background 0.3s ease; }
+    .bar:hover { background: linear-gradient(180deg, #38bdf8, #0ea5e9); }
+    .tooltip { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 6px; padding: 4px 8px; background: #0f172a; color: white; font-size: 0.75rem; border-radius: 6px; opacity: 0; pointer-events: none; white-space: nowrap; transition: opacity 0.2s ease; }
+    .bar:hover .tooltip { opacity: 1; }
 
-    .stats {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+    button.add-btn { padding: 0.25rem 0.5rem; border-radius: 6px; border: none; background: #0ea5e9; color: white; font-weight: 600; margin-left: 0.5rem; cursor: pointer; }
 
-    .stats-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      background: linear-gradient(90deg, #0ea5e9, #38bdf8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 10px;
-      border-radius: 5px;
-      background: #e2e8f0;
-      margin-top: 0.5rem;
-      overflow: hidden;
-    }
-
-    .progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #4ade80, #22c55e);
-      width: 0%;
-      border-radius: 5px;
-      transition: width 1s ease;
-    }
-
-    .chart {
-      width: 100%;
-      height: 150px;
-      display: flex;
-      align-items: flex-end;
-      gap: 6px;
-    }
-
-    .bar {
-      flex: 1;
-      background: linear-gradient(180deg, #0ea5e9, #38bdf8);
-      border-radius: 4px 4px 0 0;
-      height: 20%;
-      transition: height 1s ease, background 0.3s ease;
-      position: relative;
-    }
-
-    .bar:hover {
-      background: linear-gradient(180deg, #38bdf8, #0ea5e9);
-    }
-
-    .tooltip {
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      margin-bottom: 6px;
-      padding: 4px 8px;
-      background: #0f172a;
-      color: white;
-      font-size: 0.75rem;
-      border-radius: 6px;
-      opacity: 0;
-      pointer-events: none;
-      white-space: nowrap;
-      transition: opacity 0.2s ease;
-    }
-
-    .bar:hover .tooltip {
-      opacity: 1;
-    }
-
-    nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: white;
-      display: flex;
-      justify-content: space-around;
-      padding: 0.75rem 0;
-      border-top: 1px solid #e2e8f0;
-    }
-
-    nav button {
-      background: none;
-      border: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: #64748b;
-    }
-
-    nav button.active {
-      color: #0ea5e9;
-    }
-
-    .fullscreen-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: white;
-      z-index: 100;
-      padding: 2rem;
-      display: none;
-      flex-direction: column;
-      overflow-y: auto;
-    }
-
-    .fullscreen-overlay.active {
-      display: flex;
-    }
-
-    .close-btn {
-      align-self: flex-end;
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
   <header id="header">Wellness Tracker</header>
 
-  <main class="dashboard">
+  <main id="dashboard-page">
     <div class="card">
       <h2>Steps Today</h2>
       <div class="stats">
         <div class="stats-value" id="steps-count">0</div>
-        <span> / 10,000</span>
+        <span>/ <span id="steps-goal">10000</span></span>
+        <button class="add-btn" onclick="addSteps(500)">+500</button>
       </div>
       <div class="progress-bar"><div class="progress-bar-fill" id="steps-bar"></div></div>
     </div>
@@ -198,85 +53,138 @@
       <h2>Water Intake</h2>
       <div class="stats">
         <div class="stats-value" id="water-count">0</div>
-        <span> / 8 cups</span>
+        <span>/ <span id="water-goal">8</span> cups</span>
+        <button class="add-btn" onclick="addWater(1)">+1</button>
       </div>
       <div class="progress-bar"><div class="progress-bar-fill" id="water-bar"></div></div>
     </div>
 
     <div class="card">
       <h2>Weekly Activity</h2>
-      <div class="chart" id="activity-chart">
-        <div class="bar"><div class="tooltip">Mon: 30%</div></div>
-        <div class="bar"><div class="tooltip">Tue: 50%</div></div>
-        <div class="bar"><div class="tooltip">Wed: 80%</div></div>
-        <div class="bar"><div class="tooltip">Thu: 60%</div></div>
-        <div class="bar"><div class="tooltip">Fri: 90%</div></div>
-        <div class="bar"><div class="tooltip">Sat: 40%</div></div>
-        <div class="bar"><div class="tooltip">Sun: 70%</div></div>
-      </div>
+      <div class="chart" id="activity-chart"></div>
     </div>
   </main>
 
+  <main id="history-page" class="hidden">
+    <h2>History</h2>
+    <div id="history-list"></div>
+  </main>
+
+  <main id="profile-page" class="hidden">
+    <h2>Profile & Goals</h2>
+    <label>Steps Goal: <input type="number" id="input-steps-goal" /></label><br/>
+    <label>Water Goal: <input type="number" id="input-water-goal" /></label><br/>
+    <button onclick="saveGoals()">Save Goals</button>
+    <button onclick="resetData()" style="margin-top:1rem; background:#ef4444; color:white; border:none; padding:0.5rem 1rem; border-radius:6px; cursor:pointer;">Reset Data</button>
+  </main>
+
   <nav>
-    <button class="active">Dashboard</button>
-    <button>History</button>
-    <button>Profile</button>
+    <button class="active" onclick="showPage('dashboard')">Dashboard</button>
+    <button onclick="showPage('history')">History</button>
+    <button onclick="showPage('profile')">Profile</button>
   </nav>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const stepsCount = document.getElementById("steps-count");
-      const stepsBar = document.getElementById("steps-bar");
-      const waterCount = document.getElementById("water-count");
-      const waterBar = document.getElementById("water-bar");
-      const bars = document.querySelectorAll(".bar");
+    // LocalStorage Data
+    let data = JSON.parse(localStorage.getItem('wellnessData')) || { steps: 0, water: 0, history: [], stepsGoal: 10000, waterGoal: 8 };
 
-      let steps = 0;
-      let targetSteps = 7650;
-      let water = 0;
-      let targetWater = 6;
+    const stepsCount = document.getElementById('steps-count');
+    const waterCount = document.getElementById('water-count');
+    const stepsBar = document.getElementById('steps-bar');
+    const waterBar = document.getElementById('water-bar');
+    const stepsGoalEl = document.getElementById('steps-goal');
+    const waterGoalEl = document.getElementById('water-goal');
+    const activityChart = document.getElementById('activity-chart');
+    const historyList = document.getElementById('history-list');
 
-      const stepsInterval = setInterval(() => {
-        if (steps < targetSteps) {
-          steps += 150;
-          stepsCount.textContent = steps;
-          stepsBar.style.width = `${(steps / 10000) * 100}%`;
-        } else {
-          clearInterval(stepsInterval);
-        }
-      }, 50);
+    function saveData(){
+      localStorage.setItem('wellnessData', JSON.stringify(data));
+      renderDashboard();
+    }
 
-      const waterInterval = setInterval(() => {
-        if (water < targetWater) {
-          water++;
-          waterCount.textContent = water;
-          waterBar.style.width = `${(water / 8) * 100}%`;
-        } else {
-          clearInterval(waterInterval);
-        }
-      }, 300);
+    function renderDashboard(){
+      stepsCount.textContent = data.steps;
+      waterCount.textContent = data.water;
+      stepsBar.style.width = Math.min((data.steps/data.stepsGoal)*100, 100) + '%';
+      waterBar.style.width = Math.min((data.water/data.waterGoal)*100, 100) + '%';
+      stepsGoalEl.textContent = data.stepsGoal;
+      waterGoalEl.textContent = data.waterGoal;
 
-      const weeklyData = [30, 50, 80, 60, 90, 40, 70];
-      bars.forEach((bar, i) => {
-        setTimeout(() => {
-          bar.style.height = `${weeklyData[i]}%`;
-        }, i * 150);
+      // Weekly chart
+      activityChart.innerHTML = '';
+      let last7 = data.history.slice(-7);
+      for(let i=0;i<7;i++){
+        let dayData = last7[i] || { steps:0 };
+        let bar = document.createElement('div');
+        bar.className = 'bar';
+        let pct = Math.min((dayData.steps/data.stepsGoal)*100,100);
+        bar.style.height = pct + '%';
+        let tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
+        tooltip.textContent = `${dayData.date || 'N/A'}: ${dayData.steps} steps`; 
+        bar.appendChild(tooltip);
+        activityChart.appendChild(bar);
+      }
+    }
+
+    function addSteps(val){
+      data.steps += val;
+      saveData();
+    }
+    function addWater(val){
+      data.water += val;
+      saveData();
+    }
+
+    function showPage(page){
+      document.querySelectorAll('main').forEach(m=>m.classList.add('hidden'));
+      document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+      if(page==='dashboard'){ document.getElementById('dashboard-page').classList.remove('hidden'); document.querySelector('nav button:nth-child(1)').classList.add('active'); }
+      if(page==='history'){ document.getElementById('history-page').classList.remove('hidden'); document.querySelector('nav button:nth-child(2)').classList.add('active'); renderHistory(); }
+      if(page==='profile'){ document.getElementById('profile-page').classList.remove('hidden'); document.querySelector('nav button:nth-child(3)').classList.add('active'); document.getElementById('input-steps-goal').value = data.stepsGoal; document.getElementById('input-water-goal').value = data.waterGoal; }
+    }
+
+    function renderHistory(){
+      historyList.innerHTML = '';
+      data.history.slice().reverse().forEach(d=>{
+        let div = document.createElement('div');
+        div.textContent = `${d.date}: ${d.steps} steps, ${d.water} cups`; 
+        div.className='card';
+        historyList.appendChild(div);
       });
+    }
 
-      // Fullscreen API trigger
-      const header = document.getElementById("header");
-      header.addEventListener("click", async () => {
-        if (document.documentElement.requestFullscreen) {
-          try {
-            await document.documentElement.requestFullscreen();
-          } catch (err) {
-            console.warn("Fullscreen request failed", err);
-          }
-        } else if (document.documentElement.webkitRequestFullscreen) {
-          document.documentElement.webkitRequestFullscreen();
-        }
-      });
+    function saveGoals(){
+      data.stepsGoal = parseInt(document.getElementById('input-steps-goal').value)||10000;
+      data.waterGoal = parseInt(document.getElementById('input-water-goal').value)||8;
+      saveData();
+      showPage('dashboard');
+    }
+
+    function resetData(){
+      if(confirm('Are you sure you want to reset all data?')){
+        data = { steps:0, water:0, history:[], stepsGoal:10000, waterGoal:8 };
+        saveData();
+      }
+    }
+
+    // Save daily history on unload
+    window.addEventListener('beforeunload',()=>{
+      let today = new Date().toISOString().split('T')[0];
+      data.history.push({ date: today, steps: data.steps, water: data.water });
+      saveData();
     });
+
+    // Fullscreen toggle
+    document.getElementById('header').addEventListener('click',async()=>{
+      if(document.documentElement.requestFullscreen){
+        try{ await document.documentElement.requestFullscreen(); }catch(e){ console.warn(e); }
+      } else if(document.documentElement.webkitRequestFullscreen){
+        document.documentElement.webkitRequestFullscreen();
+      }
+    });
+
+    renderDashboard();
   </script>
 </body>
 </html>
