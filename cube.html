@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dynamic Cube Shadow</title>
+<title>Interactive Cube Shadow</title>
 <style>
   body {
     margin: 0;
@@ -13,6 +13,18 @@
     align-items: center;
     background-color: #fff;
     overflow: hidden;
+    flex-direction: column;
+    font-family: sans-serif;
+  }
+
+  #start {
+    padding: 12px 24px;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 8px;
+    border: none;
+    background: #0077ff;
+    color: white;
   }
 
   .cube {
@@ -22,35 +34,20 @@
     border-radius: 5px;
     box-shadow: 0 20px 40px rgba(0,0,0,0.1);
     transition: box-shadow 0.2s ease, transform 0.1s ease;
+    margin-top: 40px;
   }
 </style>
 </head>
 <body>
-<div class="cube"></div>
+
+<button id="start">Start</button>
+<div class="cube" style="display:none;"></div>
 
 <script>
 const cube = document.querySelector('.cube');
-let brightness = 1; // default ambient light factor
+const startBtn = document.getElementById('start');
+let brightness = 1; // default ambient light
 
-// Handle device motion for shadow direction
-window.addEventListener('deviceorientation', (event) => {
-  // event.beta : rotation around X (-180 to 180)
-  // event.gamma: rotation around Y (-90 to 90)
-  const maxOffset = 30; // max shadow offset
-  const xOffset = (event.gamma || 0) / 90 * maxOffset; 
-  const yOffset = (event.beta || 0) / 180 * maxOffset;
-  
-  updateShadow(xOffset, yOffset);
-});
-
-// Update shadow based on offsets and ambient light
-function updateShadow(xOffset, yOffset) {
-  const shadowIntensity = Math.min(Math.max(brightness, 0), 1);
-  const shadowColor = `rgba(0,0,0,${0.15 * shadowIntensity})`;
-  cube.style.boxShadow = `${xOffset}px ${20 + yOffset}px 40px ${shadowColor}`;
-}
-
-// Access front camera to estimate brightness
 async function initCamera() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
@@ -62,6 +59,8 @@ async function initCamera() {
     const ctx = canvas.getContext('2d');
 
     function sampleBrightness() {
+      if (video.videoWidth === 0) return requestAnimationFrame(sampleBrightness);
+
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -71,7 +70,6 @@ async function initCamera() {
         const r = frame.data[i];
         const g = frame.data[i+1];
         const b = frame.data[i+2];
-        // luminance formula
         total += 0.2126*r + 0.7152*g + 0.0722*b;
       }
       const avg = total / (frame.data.length / 4);
@@ -81,11 +79,48 @@ async function initCamera() {
 
     video.addEventListener('loadeddata', () => sampleBrightness());
   } catch(e) {
-    console.warn("Camera not accessible, default brightness applied.");
+    console.warn("Camera not accessible, using default brightness.");
   }
 }
 
-initCamera();
+function initMotion() {
+  function addListener() {
+    window.addEventListener('deviceorientation', (event) => {
+      const maxOffset = 30;
+      const xOffset = (event.gamma || 0) / 90 * maxOffset; 
+      const yOffset = (event.beta || 0) / 180 * maxOffset;
+      updateShadow(xOffset, yOffset);
+    });
+  }
+
+  // iOS 13+ permission flow
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    DeviceMotionEvent.requestPermission()
+      .then(response => {
+        if (response === 'granted') addListener();
+        else console.warn("Motion permission denied");
+      })
+      .catch(console.error);
+  } else {
+    // no permission needed
+    addListener();
+  }
+}
+
+function updateShadow(xOffset, yOffset) {
+  const shadowIntensity = Math.min(Math.max(brightness, 0), 1);
+  const shadowColor = `rgba(0,0,0,${0.15 * shadowIntensity})`;
+  cube.style.boxShadow = `${xOffset}px ${20 + yOffset}px 40px ${shadowColor}`;
+}
+
+// Start button handler
+startBtn.addEventListener('click', () => {
+  startBtn.style.display = 'none';
+  cube.style.display = 'block';
+  initCamera();
+  initMotion();
+});
 </script>
+
 </body>
 </html>
