@@ -14,6 +14,7 @@
     flex-direction: column;
     justify-content: center;
     margin: 0;
+    position: relative;
   }
   #headline {
     font-size: 2em;
@@ -22,15 +23,29 @@
   #brightness {
     font-size: 1.5em;
   }
+  #threshold {
+    font-size: 1.2em;
+    margin-bottom: 1em;
+  }
+  #tint {
+    position: absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+    transition: background-color 0.5s;
+  }
   video {
-    display: none; /* hide camera feed */
+    display: none;
   }
 </style>
 </head>
 <body>
 <h1 id="headline">Ambient is Light/Dark</h1>
 <div id="brightness">Brightness: 0</div>
-<div id="threshold">Target: 100</div>
+<div id="threshold">Target: 165</div>
+<div id="tint"></div>
 <video id="video" autoplay playsinline></video>
 <script>
 (async () => {
@@ -38,9 +53,9 @@
   const headline = document.getElementById('headline');
   const brightnessDisplay = document.getElementById('brightness');
   const thresholdDisplay = document.getElementById('threshold');
+  const tintDiv = document.getElementById('tint');
 
-  // Threshold for switching themes
-  const targetBrightness = 150; // adjust as needed
+  const targetBrightness = 165;
   thresholdDisplay.textContent = `Target: ${targetBrightness}`;
 
   // Access front camera
@@ -55,6 +70,10 @@
 
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
+
+  const brightnessHistory = [];
+  const historyLength = 5; // last 5 samples for smoothing
+  const scanInterval = 500; // milliseconds
 
   function getAverageBrightness(frame) {
     const length = frame.data.length / 4;
@@ -78,36 +97,42 @@
     };
   }
 
-  function update() {
+  function smoothBrightness(newValue) {
+    brightnessHistory.push(newValue);
+    if (brightnessHistory.length > historyLength) brightnessHistory.shift();
+    const sum = brightnessHistory.reduce((a,b)=>a+b,0);
+    return sum / brightnessHistory.length;
+  }
+
+  async function scan() {
     if (video.readyState >= 2) {
-      canvas.width = video.videoWidth / 4; // reduce resolution for performance
+      canvas.width = video.videoWidth / 4;
       canvas.height = video.videoHeight / 4;
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const avg = getAverageBrightness(frame);
+      const smoothed = smoothBrightness(avg.brightness);
 
-      brightnessDisplay.textContent = `Brightness: ${Math.round(avg.brightness)}`;
+      brightnessDisplay.textContent = `Brightness: ${Math.round(smoothed)}`;
 
-      // Tint based on average color (orange/teal)
+      // Theme switch
+      const isDark = smoothed < targetBrightness;
+      document.body.style.backgroundColor = isDark ? '#111' : '#fff';
+      document.body.style.color = isDark ? '#fff' : '#000';
+      headline.textContent = isDark ? 'Ambient is Dark' : 'Ambient is Light';
+
+      // Tint based on color
+      let tintColor = 'transparent';
       const orangeScore = avg.r - avg.b;
       const tealScore = avg.b - avg.r;
-      let tint = 'transparent';
-      if (orangeScore > 40) tint = 'rgba(255,165,0,0.2)';
-      if (tealScore > 40) tint = 'rgba(0,128,128,0.2)';
-
-      document.body.style.backgroundColor = avg.brightness < targetBrightness ? '#111' : '#fff';
-      document.body.style.color = avg.brightness < targetBrightness ? '#fff' : '#000';
-      headline.textContent = avg.brightness < targetBrightness ? 'Ambient is Dark' : 'Ambient is Light';
-      document.body.style.backgroundColor = avg.brightness < targetBrightness ? `#111` : `#fff`;
-      document.body.style.backgroundColor = `linear-gradient(${tint}, ${avg.brightness < targetBrightness ? '#111' : '#fff'})`;
-
-      requestAnimationFrame(update);
-    } else {
-      requestAnimationFrame(update);
+      if (orangeScore > 40) tintColor = 'rgba(255,165,0,0.2)';
+      if (tealScore > 40) tintColor = 'rgba(0,128,128,0.2)';
+      tintDiv.style.backgroundColor = tintColor;
     }
+    setTimeout(scan, scanInterval);
   }
 
-  update();
+  scan();
 })();
 </script>
 </body>
