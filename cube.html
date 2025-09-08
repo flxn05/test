@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Cube Shadow</title>
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    overflow: hidden;
+  }
+
+  .cube {
+    width: 100px;
+    height: 100px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    transition: box-shadow 0.2s ease, transform 0.1s ease;
+  }
+</style>
+</head>
+<body>
+<div class="cube"></div>
+
+<script>
+const cube = document.querySelector('.cube');
+let brightness = 1; // default ambient light factor
+
+// Handle device motion for shadow direction
+window.addEventListener('deviceorientation', (event) => {
+  // event.beta : rotation around X (-180 to 180)
+  // event.gamma: rotation around Y (-90 to 90)
+  const maxOffset = 30; // max shadow offset
+  const xOffset = (event.gamma || 0) / 90 * maxOffset; 
+  const yOffset = (event.beta || 0) / 180 * maxOffset;
+  
+  updateShadow(xOffset, yOffset);
+});
+
+// Update shadow based on offsets and ambient light
+function updateShadow(xOffset, yOffset) {
+  const shadowIntensity = Math.min(Math.max(brightness, 0), 1);
+  const shadowColor = `rgba(0,0,0,${0.15 * shadowIntensity})`;
+  cube.style.boxShadow = `${xOffset}px ${20 + yOffset}px 40px ${shadowColor}`;
+}
+
+// Access front camera to estimate brightness
+async function initCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+    const video = document.createElement('video');
+    video.srcObject = stream;
+    video.play();
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    function sampleBrightness() {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const frame = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      let total = 0;
+      for (let i = 0; i < frame.data.length; i += 4) {
+        const r = frame.data[i];
+        const g = frame.data[i+1];
+        const b = frame.data[i+2];
+        // luminance formula
+        total += 0.2126*r + 0.7152*g + 0.0722*b;
+      }
+      const avg = total / (frame.data.length / 4);
+      brightness = avg / 255; // normalize 0-1
+      requestAnimationFrame(sampleBrightness);
+    }
+
+    video.addEventListener('loadeddata', () => sampleBrightness());
+  } catch(e) {
+    console.warn("Camera not accessible, default brightness applied.");
+  }
+}
+
+initCamera();
+</script>
+</body>
+</html>
