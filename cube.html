@@ -15,6 +15,7 @@
     background-color: #fff;
     transition: background-color 0.5s ease;
     perspective: 800px;
+    flex-direction: column;
   }
 
   #start {
@@ -25,7 +26,8 @@
     border: none;
     background: #0077ff;
     color: white;
-    position: absolute;
+    z-index: 10; /* ensure button is on top */
+    position: relative;
   }
 
   .cube-container {
@@ -33,6 +35,7 @@
     height: 150px;
     transform-style: preserve-3d;
     position: relative;
+    display: none; /* hidden until start */
   }
 
   .cube {
@@ -61,7 +64,7 @@ const startBtn = document.getElementById('start');
 const cube = document.querySelector('.cube');
 const cubeContainer = document.querySelector('.cube-container');
 
-let brightness = 1; // normalized 0-1
+let brightness = 1;
 let xRotation = 20, yRotation = 20;
 
 async function initCamera() {
@@ -89,28 +92,25 @@ async function initCamera() {
       }
       const avg = total / (frame.data.length / 4);
       brightness = avg / 255;
-      // Adjust body bg gradually
       document.body.style.backgroundColor = `rgb(${Math.floor(brightness*255)},${Math.floor(brightness*255)},${Math.floor(brightness*255)})`;
       requestAnimationFrame(sampleBrightness);
     }
 
     video.addEventListener('loadeddata', () => sampleBrightness());
   } catch(e) {
-    console.warn("Camera not accessible, default brightness applied.");
+    console.warn("Camera not accessible.");
   }
 }
 
 function initMotion() {
   function addListener() {
     window.addEventListener('deviceorientation', (event) => {
-      // Map device rotation to cube rotation
-      const gamma = event.gamma || 0; // left-right tilt
-      const beta = event.beta || 0;   // front-back tilt
+      const gamma = event.gamma || 0;
+      const beta = event.beta || 0;
       xRotation = 20 + beta; 
       yRotation = 20 + gamma;
       cube.style.transform = `rotateX(${xRotation}deg) rotateY(${yRotation}deg)`;
       
-      // Shadow offset
       const maxOffset = 40;
       const xOffset = gamma / 90 * maxOffset; 
       const yOffset = beta / 90 * maxOffset;
@@ -139,7 +139,6 @@ async function enterFullscreenAndLock() {
   }
 }
 
-// Start button click handler
 startBtn.addEventListener('click', async () => {
   startBtn.style.display = 'none';
   cubeContainer.style.display = 'block';
