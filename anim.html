@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Gigadrive Animationen</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: hsl(0, 0%, 10%);
+      overflow: hidden;
+    }
+
+    .anim {
+      width: 150px;
+      height: 150px;
+      background: hsl(162, 82%, 40%);
+      border-radius: 10px;
+    }
+
+    /* === Erste 5 Animationen (abstrakt) === */
+    @keyframes anim1 {
+      0%,100% { transform: scale(1);}
+      50% { transform: scale(1.5);}
+    }
+
+    @keyframes anim2 {
+      0% { transform: rotate(0deg);}
+      100% { transform: rotate(360deg);}
+    }
+
+    @keyframes anim3 {
+      0%,100% { border-radius: 10px;}
+      50% { border-radius: 50%;}
+    }
+
+    @keyframes anim4 {
+      0%,100% { transform: translateY(0);}
+      50% { transform: translateY(-100px);}
+    }
+
+    @keyframes anim5 {
+      0%,100% { opacity: 1;}
+      50% { opacity: 0.2;}
+    }
+
+    /* === Gigadrive-inspirierte 5 Animationen === */
+    @keyframes anim6 {
+      0% { box-shadow: 0 0 0 hsl(162,82%,40%);}
+      50% { box-shadow: 0 0 40px hsl(162,82%,40%);}
+      100% { box-shadow: 0 0 0 hsl(162,82%,40%);}
+    }
+
+    @keyframes anim7 {
+      0% { clip-path: inset(0 100% 0 0);}
+      100% { clip-path: inset(0 0 0 0);}
+    }
+
+    @keyframes anim8 {
+      0%,100% { transform: translateY(0);}
+      50% { transform: translateY(-50px);}
+    }
+
+    @keyframes anim9 {
+      0%,100% { background: hsl(162,82%,40%);}
+      50% { background: linear-gradient(45deg,hsl(162,82%,40%), hsl(162,82%,20%));}
+    }
+
+    @keyframes anim10 {
+      0% { transform: scale(0.5) rotate(0deg);}
+      50% { transform: scale(1.2) rotate(180deg);}
+      100% { transform: scale(0.5) rotate(360deg);}
+    }
+
+    /* Animationen nacheinander (jede 5s) */
+    .anim {
+      animation-duration: 5s;
+      animation-fill-mode: both;
+      animation-iteration-count: infinite;
+      animation-timing-function: ease-in-out;
+    }
+
+    .anim {
+      animation-name: anim1;
+      animation-delay: 0s;
+    }
+    .anim::before {
+      content: "";
+      position: absolute;
+    }
+
+    @keyframes sequence {
+      0%   { animation-name: anim1;}
+      10%  { animation-name: anim2;}
+      20%  { animation-name: anim3;}
+      30%  { animation-name: anim4;}
+      40%  { animation-name: anim5;}
+      50%  { animation-name: anim6;}
+      60%  { animation-name: anim7;}
+      70%  { animation-name: anim8;}
+      80%  { animation-name: anim9;}
+      90%  { animation-name: anim10;}
+      100% { animation-name: anim1;}
+    }
+  </style>
+</head>
+<body>
+  <div class="anim"></div>
+
+  <script>
+    const anim = document.querySelector('.anim');
+    const animations = [
+      'anim1','anim2','anim3','anim4','anim5',
+      'anim6','anim7','anim8','anim9','anim10'
+    ];
+    let index = 0;
+
+    setInterval(() => {
+      anim.style.animationName = animations[index];
+      index = (index + 1) % animations.length;
+    }, 5000);
+  </script>
+</body>
+</html>
