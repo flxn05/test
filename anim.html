@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Gigadrive Loader</title>
+  <title>Gigadrive SVG Loader</title>
   <style>
     body {
       margin: 0;
@@ -13,178 +13,123 @@
       background: hsl(0, 0%, 10%);
     }
 
-    .stage {
-      width: 200px;
-      height: 200px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
+    svg {
+      width: 120px;
+      height: 120px;
+      stroke: hsl(162, 82%, 40%);
+      fill: none;
     }
 
-    .loader {
-      position: absolute;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    /* === Animations === */
+
+    /* 1. Circular spinner */
+    .anim1 circle {
+      stroke-width: 6;
+      stroke-linecap: round;
+      stroke-dasharray: 283;
+      stroke-dashoffset: 75;
+      animation: rotate 1.2s linear infinite;
     }
 
-    /* === Gigadrive Loader Styles === */
-
-    /* 1: Thin circular spinner */
-    .anim1 {
-      width: 80px; height: 80px;
-      border: 4px solid rgba(255,255,255,0.1);
-      border-top: 4px solid hsl(162,82%,40%);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
+    /* 2. Dashed orbit */
+    .anim2 circle {
+      stroke-width: 6;
+      stroke-dasharray: 20 15;
+      animation: rotate 2s linear infinite;
     }
 
-    /* 2: Dots rotating in a circle */
-    .anim2 div {
-      position: absolute;
-      width: 12px; height: 12px;
-      background: hsl(162,82%,40%);
-      border-radius: 50%;
-      animation: orbit 1.5s linear infinite;
-    }
-    .anim2 div:nth-child(1) { animation-delay: 0s; }
-    .anim2 div:nth-child(2) { animation-delay: 0.3s; }
-    .anim2 div:nth-child(3) { animation-delay: 0.6s; }
-    .anim2 div:nth-child(4) { animation-delay: 0.9s; }
-    @keyframes orbit {
-      0% { transform: rotate(0deg) translateX(35px) rotate(0deg);}
-      100% { transform: rotate(360deg) translateX(35px) rotate(-360deg);}
+    /* 3. Progress sweep */
+    .anim3 circle {
+      stroke-width: 6;
+      stroke-dasharray: 283;
+      stroke-dashoffset: 283;
+      animation: sweep 2s cubic-bezier(0.4,0,0.2,1) infinite;
     }
 
-    /* 3: Upload bar (infinite fill) */
-    .anim3 {
-      width: 100px; height: 8px;
-      background: rgba(255,255,255,0.15);
-      overflow: hidden;
-      position: relative;
-    }
-    .anim3::after {
-      content: "";
-      position: absolute; top:0; left:0; bottom:0;
-      width: 40%;
-      background: hsl(162,82%,40%);
-      animation: slide 1s cubic-bezier(0.4,0,0.2,1) infinite;
+    /* 4. Pulse circle */
+    .anim4 circle {
+      stroke-width: 6;
+      transform-origin: 50% 50%;
+      animation: pulse 1.8s cubic-bezier(0.25,1,0.5,1) infinite;
     }
 
-    /* 4: Ripple circles */
-    .anim4 div {
-      position: absolute;
-      border: 2px solid hsl(162,82%,40%);
-      border-radius: 50%;
-      width: 40px; height: 40px;
-      animation: ripple 2s cubic-bezier(0.4,0,0.2,1) infinite;
-    }
-    .anim4 div:nth-child(2) { animation-delay: 1s; }
-    @keyframes ripple {
-      from { transform: scale(0.5); opacity: 1; }
-      to { transform: scale(2.5); opacity: 0; }
+    /* 5. Dual rotating arcs */
+    .anim5 circle {
+      stroke-width: 6;
+      stroke-dasharray: 70 213;
+      animation: rotate 1.2s cubic-bezier(0.7,0,0.3,1) infinite;
     }
 
-    /* 5: Dual arcs rotating */
-    .anim5 {
-      width: 80px; height: 80px;
-      border-radius: 50%;
-      border: 4px solid transparent;
-      border-top-color: hsl(162,82%,40%);
-      border-right-color: hsl(162,82%,40%);
-      animation: spin 1.2s cubic-bezier(0.7,0,0.3,1) infinite;
+    /* 6. Upload arrow stroke dash */
+    .anim6 path {
+      stroke-width: 6;
+      stroke-dasharray: 120;
+      stroke-dashoffset: 120;
+      animation: draw 1.5s cubic-bezier(0.4,0,0.2,1) infinite alternate;
     }
 
-    /* 6: Growing line pulses */
-    .anim6 div {
-      width: 6px; height: 30px;
-      margin: 0 3px;
-      background: hsl(162,82%,40%);
-      animation: grow 1s cubic-bezier(0.25,1,0.5,1) infinite;
-    }
-    .anim6 div:nth-child(2) { animation-delay: 0.2s; }
-    .anim6 div:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes grow {
-      0%,100% { transform: scaleY(0.5); opacity: 0.4; }
-      50% { transform: scaleY(1.4); opacity: 1; }
+    /* 7. Sync arrows */
+    .anim7 path {
+      stroke-width: 6;
+      stroke-dasharray: 120;
+      stroke-dashoffset: 240;
+      animation: dashmove 2s cubic-bezier(0.55,0.1,0.55,1) infinite linear;
     }
 
-    /* 7: Circular dash stroke */
-    .anim7 {
-      width: 80px; height: 80px;
-      border-radius: 50%;
-      border: 4px dashed hsl(162,82%,40%);
-      animation: spin 2s cubic-bezier(0.6,0,0.4,1) infinite;
+    /* 8. Orbiting dot */
+    .anim8 circle.dot {
+      stroke: none;
+      fill: hsl(162,82%,40%);
+      r: 8;
+      transform-origin: 50% 50%;
+      animation: orbitDot 1.2s cubic-bezier(0.55,0.1,0.55,1) infinite;
+    }
+    .anim8 circle.ring {
+      stroke-width: 4;
+      opacity: 0.3;
     }
 
-    /* 8: Upload arrow made from bars */
-    .anim8 {
-      position: relative;
-      width: 60px; height: 60px;
-    }
-    .anim8::before, .anim8::after {
-      content:"";
-      position: absolute;
-      background: hsl(162,82%,40%);
-    }
-    .anim8::before {
-      width: 10px; height: 100%;
-      left: 50%; top: 0;
-      transform: translateX(-50%);
-      animation: arrowLine 1s cubic-bezier(0.4,0,0.2,1) infinite;
-    }
-    .anim8::after {
-      width: 20px; height: 20px;
-      left: 50%; top: 0;
-      clip-path: polygon(50% 0, 100% 100%, 0 100%);
-      transform: translate(-50%, -50%);
-      background: hsl(162,82%,40%);
-      animation: arrowHead 1s cubic-bezier(0.4,0,0.2,1) infinite;
-    }
-    @keyframes arrowLine {
-      0% { height: 0; }
-      100% { height: 100%; }
-    }
-    @keyframes arrowHead {
-      0% { transform: translate(-50%, -50%) scaleY(0); opacity: 0; }
-      100% { transform: translate(-50%, -50%) scaleY(1); opacity: 1; }
+    /* 9. Expanding ring */
+    .anim9 circle {
+      stroke-width: 6;
+      stroke-dasharray: 283;
+      stroke-dashoffset: 283;
+      animation: expand 2s cubic-bezier(0.4,0,0.2,1) infinite;
     }
 
-    /* 9: Rotating square outline */
-    .anim9 {
-      width: 70px; height: 70px;
-      border: 3px solid hsl(162,82%,40%);
-      animation: spin 1.5s cubic-bezier(0.3,0.7,0.7,0.3) infinite;
+    /* 10. Checkmark morph */
+    .anim10 path {
+      stroke-width: 6;
+      stroke-dasharray: 60;
+      stroke-dashoffset: 60;
+      animation: draw 1.2s cubic-bezier(0.4,0,0.2,1) infinite alternate;
     }
 
-    /* 10: Orbiting ring (upload "sync") */
-    .anim10 {
-      width: 80px; height: 80px;
-      border: 4px solid rgba(255,255,255,0.15);
-      border-radius: 50%;
-      position: relative;
+    /* === Keyframes === */
+    @keyframes rotate { to { transform: rotate(360deg);} }
+    @keyframes sweep {
+      0% { stroke-dashoffset: 283;}
+      50% { stroke-dashoffset: 0;}
+      100% { stroke-dashoffset: 283;}
     }
-    .anim10::after {
-      content:"";
-      position: absolute;
-      top: 0; left: 50%;
-      width: 16px; height: 16px;
-      margin-left: -8px;
-      border-radius: 50%;
-      background: hsl(162,82%,40%);
-      animation: orbitDot 1.5s cubic-bezier(0.55,0.1,0.55,1) infinite;
+    @keyframes pulse {
+      0%,100% { transform: scale(0.8); opacity: 0.6; }
+      50% { transform: scale(1.2); opacity: 1; }
+    }
+    @keyframes draw {
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes dashmove {
+      to { stroke-dashoffset: 0; }
     }
     @keyframes orbitDot {
-      0% { transform: rotate(0deg) translateX(40px) rotate(0deg);}
-      100% { transform: rotate(360deg) translateX(40px) rotate(-360deg);}
+      0% { transform: rotate(0deg) translateX(45px) rotate(0deg);}
+      100% { transform: rotate(360deg) translateX(45px) rotate(-360deg);}
     }
-
-    /* Shared animations */
-    @keyframes spin { to { transform: rotate(360deg);} }
-    @keyframes slide {
-      0% { transform: translateX(-100%);}
-      100% { transform: translateX(250%);}
+    @keyframes expand {
+      0% { stroke-dashoffset: 283; opacity: 0.6;}
+      50% { stroke-dashoffset: 0; opacity: 1;}
+      100% { stroke-dashoffset: 283; opacity: 0.6;}
     }
   </style>
 </head>
@@ -196,22 +141,20 @@
   <script>
     const loader = document.querySelector('.loader');
     const anims = [
-      'anim1','anim2','anim3','anim4','anim5',
-      'anim6','anim7','anim8','anim9','anim10'
+      () => `<svg class="anim1" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45"/></svg>`,
+      () => `<svg class="anim2" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45"/></svg>`,
+      () => `<svg class="anim3" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45"/></svg>`,
+      () => `<svg class="anim4" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40"/></svg>`,
+      () => `<svg class="anim5" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45"/></svg>`,
+      () => `<svg class="anim6" viewBox="0 0 100 100"><path d="M50 20 L50 70 M35 40 L50 20 L65 40"/></svg>`,
+      () => `<svg class="anim7" viewBox="0 0 100 100"><path d="M30 50 A20 20 0 0 1 70 50 M70 50 A20 20 0 0 1 30 50"/></svg>`,
+      () => `<svg class="anim8" viewBox="0 0 100 100"><circle class="ring" cx="50" cy="50" r="45"/><circle class="dot" cx="50" cy="50"/></svg>`,
+      () => `<svg class="anim9" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45"/></svg>`,
+      () => `<svg class="anim10" viewBox="0 0 100 100"><path d="M30 55 L45 70 L70 35"/></svg>`
     ];
     let i = 0;
     function setAnim() {
-      loader.className = 'loader ' + anims[i];
-      loader.innerHTML = '';
-      if(anims[i]==='anim2') {
-        loader.innerHTML = '<div></div><div></div><div></div><div></div>';
-      }
-      if(anims[i]==='anim4') {
-        loader.innerHTML = '<div></div><div></div>';
-      }
-      if(anims[i]==='anim6') {
-        loader.innerHTML = '<div></div><div></div><div></div>';
-      }
+      loader.innerHTML = anims[i]();
       i = (i+1) % anims.length;
     }
     setAnim();
