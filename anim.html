@@ -22,167 +22,169 @@
       position: relative;
     }
 
-    /* Basis für Loader */
     .loader {
       position: absolute;
-      width: 100%;
-      height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
     }
 
-    /* 1. Kreis spinner */
+    /* === Gigadrive Loader Styles === */
+
+    /* 1: Thin circular spinner */
     .anim1 {
-      border: 10px solid rgba(255,255,255,0.1);
-      border-top: 10px solid hsl(162,82%,40%);
+      width: 80px; height: 80px;
+      border: 4px solid rgba(255,255,255,0.1);
+      border-top: 4px solid hsl(162,82%,40%);
       border-radius: 50%;
-      width: 80px;
-      height: 80px;
       animation: spin 1s linear infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg);} }
 
-    /* 2. Punkte pulsieren */
+    /* 2: Dots rotating in a circle */
     .anim2 div {
-      width: 15px; height: 15px;
-      margin: 0 5px;
+      position: absolute;
+      width: 12px; height: 12px;
       background: hsl(162,82%,40%);
       border-radius: 50%;
-      animation: bounce 1s infinite alternate;
+      animation: orbit 1.5s linear infinite;
     }
-    .anim2 div:nth-child(2) { animation-delay: 0.2s; }
-    .anim2 div:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes bounce {
-      from { transform: translateY(0); opacity: 0.4; }
-      to { transform: translateY(-20px); opacity: 1; }
-    }
-
-    /* 3. Balken laden */
-    .anim3 div {
-      width: 100px;
-      height: 10px;
-      background: hsl(162,82%,40%);
-      animation: bar 2s infinite;
-    }
-    @keyframes bar {
-      0% { transform: scaleX(0); transform-origin: left; }
-      50% { transform: scaleX(1); transform-origin: left; }
-      100% { transform: scaleX(0); transform-origin: right; }
+    .anim2 div:nth-child(1) { animation-delay: 0s; }
+    .anim2 div:nth-child(2) { animation-delay: 0.3s; }
+    .anim2 div:nth-child(3) { animation-delay: 0.6s; }
+    .anim2 div:nth-child(4) { animation-delay: 0.9s; }
+    @keyframes orbit {
+      0% { transform: rotate(0deg) translateX(35px) rotate(0deg);}
+      100% { transform: rotate(360deg) translateX(35px) rotate(-360deg);}
     }
 
-    /* 4. Ring pulsiert */
-    .anim4 {
-      border: 5px solid hsl(162,82%,40%);
-      border-radius: 50%;
-      width: 80px;
-      height: 80px;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%,100% { transform: scale(0.8); opacity: 0.5; }
-      50% { transform: scale(1.2); opacity: 1; }
-    }
-
-    /* 5. Linien laufen */
-    .anim5 {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(90deg, 
-        transparent 25%, 
-        hsl(162,82%,40%) 50%, 
-        transparent 75%);
-      background-size: 200% 100%;
-      animation: slide 1.5s infinite linear;
-    }
-    @keyframes slide {
-      from { background-position: 200% 0; }
-      to { background-position: -200% 0; }
-    }
-
-    /* === Gigadrive spezifisch === */
-
-    /* 6. Cloud pulsiert */
-    .anim6::before {
-      content:"☁️";
-      font-size: 60px;
-      animation: cloudPulse 2s infinite;
-      color: hsl(162,82%,40%);
-    }
-    @keyframes cloudPulse {
-      0%,100% { transform: scale(1); opacity: 0.7; }
-      50% { transform: scale(1.2); opacity: 1; }
-    }
-
-    /* 7. Upload-Pfeil */
-    .anim7::before {
-      content:"⬆️";
-      font-size: 60px;
-      color: hsl(162,82%,40%);
-      animation: arrowBounce 1.5s infinite;
-    }
-    @keyframes arrowBounce {
-      0%,100% { transform: translateY(10px);}
-      50% { transform: translateY(-20px);}
-    }
-
-    /* 8. Datei-Icon + progress bar */
-    .anim8 {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      color: hsl(162,82%,40%);
-      font-size: 40px;
-    }
-    .anim8::before { content: "📄"; }
-    .anim8 div {
-      width: 80px; height: 6px;
-      background: rgba(255,255,255,0.2);
-      margin-top: 10px;
+    /* 3: Upload bar (infinite fill) */
+    .anim3 {
+      width: 100px; height: 8px;
+      background: rgba(255,255,255,0.15);
       overflow: hidden;
       position: relative;
     }
-    .anim8 div::after {
-      content:"";
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 100%;
+    .anim3::after {
+      content: "";
+      position: absolute; top:0; left:0; bottom:0;
+      width: 40%;
       background: hsl(162,82%,40%);
-      animation: loadbar 2s infinite;
-    }
-    @keyframes loadbar {
-      from { transform: translateX(-100%);}
-      to { transform: translateX(100%);}
+      animation: slide 1s cubic-bezier(0.4,0,0.2,1) infinite;
     }
 
-    /* 9. Wolke mit kreisendem Ring */
-    .anim9 {
-      font-size: 50px;
-      color: hsl(162,82%,40%);
-      position: relative;
+    /* 4: Ripple circles */
+    .anim4 div {
+      position: absolute;
+      border: 2px solid hsl(162,82%,40%);
+      border-radius: 50%;
+      width: 40px; height: 40px;
+      animation: ripple 2s cubic-bezier(0.4,0,0.2,1) infinite;
     }
-    .anim9::before { content:"☁️"; }
-    .anim9::after {
+    .anim4 div:nth-child(2) { animation-delay: 1s; }
+    @keyframes ripple {
+      from { transform: scale(0.5); opacity: 1; }
+      to { transform: scale(2.5); opacity: 0; }
+    }
+
+    /* 5: Dual arcs rotating */
+    .anim5 {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      border: 4px solid transparent;
+      border-top-color: hsl(162,82%,40%);
+      border-right-color: hsl(162,82%,40%);
+      animation: spin 1.2s cubic-bezier(0.7,0,0.3,1) infinite;
+    }
+
+    /* 6: Growing line pulses */
+    .anim6 div {
+      width: 6px; height: 30px;
+      margin: 0 3px;
+      background: hsl(162,82%,40%);
+      animation: grow 1s cubic-bezier(0.25,1,0.5,1) infinite;
+    }
+    .anim6 div:nth-child(2) { animation-delay: 0.2s; }
+    .anim6 div:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes grow {
+      0%,100% { transform: scaleY(0.5); opacity: 0.4; }
+      50% { transform: scaleY(1.4); opacity: 1; }
+    }
+
+    /* 7: Circular dash stroke */
+    .anim7 {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      border: 4px dashed hsl(162,82%,40%);
+      animation: spin 2s cubic-bezier(0.6,0,0.4,1) infinite;
+    }
+
+    /* 8: Upload arrow made from bars */
+    .anim8 {
+      position: relative;
+      width: 60px; height: 60px;
+    }
+    .anim8::before, .anim8::after {
       content:"";
       position: absolute;
-      width: 90px; height: 90px;
-      border: 4px dashed hsl(162,82%,40%);
-      border-radius: 50%;
-      top: -10px; left: -20px;
-      animation: spin 3s linear infinite;
+      background: hsl(162,82%,40%);
+    }
+    .anim8::before {
+      width: 10px; height: 100%;
+      left: 50%; top: 0;
+      transform: translateX(-50%);
+      animation: arrowLine 1s cubic-bezier(0.4,0,0.2,1) infinite;
+    }
+    .anim8::after {
+      width: 20px; height: 20px;
+      left: 50%; top: 0;
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+      transform: translate(-50%, -50%);
+      background: hsl(162,82%,40%);
+      animation: arrowHead 1s cubic-bezier(0.4,0,0.2,1) infinite;
+    }
+    @keyframes arrowLine {
+      0% { height: 0; }
+      100% { height: 100%; }
+    }
+    @keyframes arrowHead {
+      0% { transform: translate(-50%, -50%) scaleY(0); opacity: 0; }
+      100% { transform: translate(-50%, -50%) scaleY(1); opacity: 1; }
     }
 
-    /* 10. Upload + Checkmark Loop */
+    /* 9: Rotating square outline */
+    .anim9 {
+      width: 70px; height: 70px;
+      border: 3px solid hsl(162,82%,40%);
+      animation: spin 1.5s cubic-bezier(0.3,0.7,0.7,0.3) infinite;
+    }
+
+    /* 10: Orbiting ring (upload "sync") */
     .anim10 {
-      font-size: 50px;
-      color: hsl(162,82%,40%);
+      width: 80px; height: 80px;
+      border: 4px solid rgba(255,255,255,0.15);
+      border-radius: 50%;
       position: relative;
     }
-    .anim10::before { content:"⬆️"; animation: fade 2s infinite alternate; }
-    .anim10::after { content:"✔️"; position: absolute; top:0; left:0; animation: fade 2s infinite alternate-reverse;}
-    @keyframes fade {
-      from { opacity: 0; transform: scale(0.5);}
-      to { opacity: 1; transform: scale(1);}
+    .anim10::after {
+      content:"";
+      position: absolute;
+      top: 0; left: 50%;
+      width: 16px; height: 16px;
+      margin-left: -8px;
+      border-radius: 50%;
+      background: hsl(162,82%,40%);
+      animation: orbitDot 1.5s cubic-bezier(0.55,0.1,0.55,1) infinite;
+    }
+    @keyframes orbitDot {
+      0% { transform: rotate(0deg) translateX(40px) rotate(0deg);}
+      100% { transform: rotate(360deg) translateX(40px) rotate(-360deg);}
+    }
+
+    /* Shared animations */
+    @keyframes spin { to { transform: rotate(360deg);} }
+    @keyframes slide {
+      0% { transform: translateX(-100%);}
+      100% { transform: translateX(250%);}
     }
   </style>
 </head>
@@ -200,14 +202,15 @@
     let i = 0;
     function setAnim() {
       loader.className = 'loader ' + anims[i];
+      loader.innerHTML = '';
       if(anims[i]==='anim2') {
+        loader.innerHTML = '<div></div><div></div><div></div><div></div>';
+      }
+      if(anims[i]==='anim4') {
+        loader.innerHTML = '<div></div><div></div>';
+      }
+      if(anims[i]==='anim6') {
         loader.innerHTML = '<div></div><div></div><div></div>';
-      } else if(anims[i]==='anim3') {
-        loader.innerHTML = '<div></div>';
-      } else if(anims[i]==='anim8') {
-        loader.innerHTML = '<div></div>';
-      } else {
-        loader.innerHTML = '';
       }
       i = (i+1) % anims.length;
     }
