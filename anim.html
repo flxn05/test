@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <title>Gigadrive Animationen</title>
+  <title>Gigadrive Loader</title>
   <style>
     body {
       margin: 0;
@@ -11,117 +11,208 @@
       justify-content: center;
       align-items: center;
       background: hsl(0, 0%, 10%);
-      overflow: hidden;
     }
 
-    .anim {
-      width: 150px;
-      height: 150px;
-      background: hsl(162, 82%, 40%);
-      border-radius: 10px;
+    .stage {
+      width: 200px;
+      height: 200px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
     }
 
-    /* === Erste 5 Animationen (abstrakt) === */
-    @keyframes anim1 {
-      0%,100% { transform: scale(1);}
-      50% { transform: scale(1.5);}
-    }
-
-    @keyframes anim2 {
-      0% { transform: rotate(0deg);}
-      100% { transform: rotate(360deg);}
-    }
-
-    @keyframes anim3 {
-      0%,100% { border-radius: 10px;}
-      50% { border-radius: 50%;}
-    }
-
-    @keyframes anim4 {
-      0%,100% { transform: translateY(0);}
-      50% { transform: translateY(-100px);}
-    }
-
-    @keyframes anim5 {
-      0%,100% { opacity: 1;}
-      50% { opacity: 0.2;}
-    }
-
-    /* === Gigadrive-inspirierte 5 Animationen === */
-    @keyframes anim6 {
-      0% { box-shadow: 0 0 0 hsl(162,82%,40%);}
-      50% { box-shadow: 0 0 40px hsl(162,82%,40%);}
-      100% { box-shadow: 0 0 0 hsl(162,82%,40%);}
-    }
-
-    @keyframes anim7 {
-      0% { clip-path: inset(0 100% 0 0);}
-      100% { clip-path: inset(0 0 0 0);}
-    }
-
-    @keyframes anim8 {
-      0%,100% { transform: translateY(0);}
-      50% { transform: translateY(-50px);}
-    }
-
-    @keyframes anim9 {
-      0%,100% { background: hsl(162,82%,40%);}
-      50% { background: linear-gradient(45deg,hsl(162,82%,40%), hsl(162,82%,20%));}
-    }
-
-    @keyframes anim10 {
-      0% { transform: scale(0.5) rotate(0deg);}
-      50% { transform: scale(1.2) rotate(180deg);}
-      100% { transform: scale(0.5) rotate(360deg);}
-    }
-
-    /* Animationen nacheinander (jede 5s) */
-    .anim {
-      animation-duration: 5s;
-      animation-fill-mode: both;
-      animation-iteration-count: infinite;
-      animation-timing-function: ease-in-out;
-    }
-
-    .anim {
-      animation-name: anim1;
-      animation-delay: 0s;
-    }
-    .anim::before {
-      content: "";
+    /* Basis für Loader */
+    .loader {
       position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
-    @keyframes sequence {
-      0%   { animation-name: anim1;}
-      10%  { animation-name: anim2;}
-      20%  { animation-name: anim3;}
-      30%  { animation-name: anim4;}
-      40%  { animation-name: anim5;}
-      50%  { animation-name: anim6;}
-      60%  { animation-name: anim7;}
-      70%  { animation-name: anim8;}
-      80%  { animation-name: anim9;}
-      90%  { animation-name: anim10;}
-      100% { animation-name: anim1;}
+    /* 1. Kreis spinner */
+    .anim1 {
+      border: 10px solid rgba(255,255,255,0.1);
+      border-top: 10px solid hsl(162,82%,40%);
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg);} }
+
+    /* 2. Punkte pulsieren */
+    .anim2 div {
+      width: 15px; height: 15px;
+      margin: 0 5px;
+      background: hsl(162,82%,40%);
+      border-radius: 50%;
+      animation: bounce 1s infinite alternate;
+    }
+    .anim2 div:nth-child(2) { animation-delay: 0.2s; }
+    .anim2 div:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      from { transform: translateY(0); opacity: 0.4; }
+      to { transform: translateY(-20px); opacity: 1; }
+    }
+
+    /* 3. Balken laden */
+    .anim3 div {
+      width: 100px;
+      height: 10px;
+      background: hsl(162,82%,40%);
+      animation: bar 2s infinite;
+    }
+    @keyframes bar {
+      0% { transform: scaleX(0); transform-origin: left; }
+      50% { transform: scaleX(1); transform-origin: left; }
+      100% { transform: scaleX(0); transform-origin: right; }
+    }
+
+    /* 4. Ring pulsiert */
+    .anim4 {
+      border: 5px solid hsl(162,82%,40%);
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { transform: scale(0.8); opacity: 0.5; }
+      50% { transform: scale(1.2); opacity: 1; }
+    }
+
+    /* 5. Linien laufen */
+    .anim5 {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(90deg, 
+        transparent 25%, 
+        hsl(162,82%,40%) 50%, 
+        transparent 75%);
+      background-size: 200% 100%;
+      animation: slide 1.5s infinite linear;
+    }
+    @keyframes slide {
+      from { background-position: 200% 0; }
+      to { background-position: -200% 0; }
+    }
+
+    /* === Gigadrive spezifisch === */
+
+    /* 6. Cloud pulsiert */
+    .anim6::before {
+      content:"☁️";
+      font-size: 60px;
+      animation: cloudPulse 2s infinite;
+      color: hsl(162,82%,40%);
+    }
+    @keyframes cloudPulse {
+      0%,100% { transform: scale(1); opacity: 0.7; }
+      50% { transform: scale(1.2); opacity: 1; }
+    }
+
+    /* 7. Upload-Pfeil */
+    .anim7::before {
+      content:"⬆️";
+      font-size: 60px;
+      color: hsl(162,82%,40%);
+      animation: arrowBounce 1.5s infinite;
+    }
+    @keyframes arrowBounce {
+      0%,100% { transform: translateY(10px);}
+      50% { transform: translateY(-20px);}
+    }
+
+    /* 8. Datei-Icon + progress bar */
+    .anim8 {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: hsl(162,82%,40%);
+      font-size: 40px;
+    }
+    .anim8::before { content: "📄"; }
+    .anim8 div {
+      width: 80px; height: 6px;
+      background: rgba(255,255,255,0.2);
+      margin-top: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+    .anim8 div::after {
+      content:"";
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 100%;
+      background: hsl(162,82%,40%);
+      animation: loadbar 2s infinite;
+    }
+    @keyframes loadbar {
+      from { transform: translateX(-100%);}
+      to { transform: translateX(100%);}
+    }
+
+    /* 9. Wolke mit kreisendem Ring */
+    .anim9 {
+      font-size: 50px;
+      color: hsl(162,82%,40%);
+      position: relative;
+    }
+    .anim9::before { content:"☁️"; }
+    .anim9::after {
+      content:"";
+      position: absolute;
+      width: 90px; height: 90px;
+      border: 4px dashed hsl(162,82%,40%);
+      border-radius: 50%;
+      top: -10px; left: -20px;
+      animation: spin 3s linear infinite;
+    }
+
+    /* 10. Upload + Checkmark Loop */
+    .anim10 {
+      font-size: 50px;
+      color: hsl(162,82%,40%);
+      position: relative;
+    }
+    .anim10::before { content:"⬆️"; animation: fade 2s infinite alternate; }
+    .anim10::after { content:"✔️"; position: absolute; top:0; left:0; animation: fade 2s infinite alternate-reverse;}
+    @keyframes fade {
+      from { opacity: 0; transform: scale(0.5);}
+      to { opacity: 1; transform: scale(1);}
     }
   </style>
 </head>
 <body>
-  <div class="anim"></div>
+  <div class="stage">
+    <div class="loader"></div>
+  </div>
 
   <script>
-    const anim = document.querySelector('.anim');
-    const animations = [
+    const loader = document.querySelector('.loader');
+    const anims = [
       'anim1','anim2','anim3','anim4','anim5',
       'anim6','anim7','anim8','anim9','anim10'
     ];
-    let index = 0;
-
-    setInterval(() => {
-      anim.style.animationName = animations[index];
-      index = (index + 1) % animations.length;
-    }, 5000);
+    let i = 0;
+    function setAnim() {
+      loader.className = 'loader ' + anims[i];
+      if(anims[i]==='anim2') {
+        loader.innerHTML = '<div></div><div></div><div></div>';
+      } else if(anims[i]==='anim3') {
+        loader.innerHTML = '<div></div>';
+      } else if(anims[i]==='anim8') {
+        loader.innerHTML = '<div></div>';
+      } else {
+        loader.innerHTML = '';
+      }
+      i = (i+1) % anims.length;
+    }
+    setAnim();
+    setInterval(setAnim, 5000);
   </script>
 </body>
 </html>
