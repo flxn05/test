@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instant Browser Overload</title>
+</head>
+<body>
+  <h1>Click the button to instantly overload the browser</h1>
+  <button id="crashButton">Crash Browser Instantly</button>
+
+  <script>
+    document.getElementById('crashButton').addEventListener('click', function() {
+      function instantOverload() {
+        // Aggressively duplicate the body content recursively
+        document.body.innerHTML += document.body.innerHTML;
+        // Immediately call again
+        instantOverload();
+      }
+      instantOverload();
+    });
+  </script>
+</body>
+</html>
