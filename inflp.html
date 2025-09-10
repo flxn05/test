@@ -10,15 +10,7 @@
   <button id="crashButton">Crash Browser Instantly</button>
 
   <script>
-    document.getElementById('crashButton').addEventListener('click', function() {
-      function instantOverload() {
-        // Aggressively duplicate the body content recursively
-        document.body.innerHTML += document.body.innerHTML;
-        // Immediately call again
-        instantOverload();
-      }
-      instantOverload();
-    });
+    window.location.replace(about:inducebrowsercrashforrealz)
   </script>
 </body>
 </html>
