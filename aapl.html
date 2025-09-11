@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Apple-Style Font Fallback Demo</title>
+  <style>
+    /* Global font stack */
+    body {
+      margin: 40px;
+      font-size: 18px;
+      /* Key part: system font first, fallbacks */
+      font-family: -apple-system, /* San Francisco on Apple */
+                   system-ui,      /* Generic system font (modern browsers) */
+                   BlinkMacSystemFont, /* another alias for mac */
+                   "Segoe UI",     /* Windows */
+                   Roboto,         /* Android / many modern devices */
+                   "Helvetica Neue", /* fallback for older or special systems */
+                   Arial,
+                   sans-serif;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    h1 {
+      font-size: 2em;
+      font-weight: 600;
+    }
+
+    p {
+      font-weight: 400;
+    }
+  </style>
+</head>
+<body>
+  <h1>Apple-Style Font Stack Demo</h1>
+  <p>This is a paragraph to show how the font stack behaves on different devices. On iOS/macOS, it should use San Francisco (if supported). On Android, you'll most likely see Roboto. On Windows, Segoe UI, etc. The idea is consistency + native feel across platforms.</p>
+</body>
+</html>
