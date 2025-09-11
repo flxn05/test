@@ -2,37 +2,60 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Apple-Style Font Fallback Demo</title>
+  <title>Apple-like Styling with Roboto</title>
   <style>
-    /* Global font stack */
     body {
       margin: 40px;
-      font-size: 18px;
-      /* Key part: system font first, fallbacks */
-      font-family: -apple-system, /* San Francisco on Apple */
-                   system-ui,      /* Generic system font (modern browsers) */
-                   BlinkMacSystemFont, /* another alias for mac */
-                   "Segoe UI",     /* Windows */
-                   Roboto,         /* Android / many modern devices */
-                   "Helvetica Neue", /* fallback for older or special systems */
-                   Arial,
-                   sans-serif;
-      line-height: 1.6;
-      color: #333;
+      font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 17px;
+      line-height: 1.5;
+      color: #1c1c1e; /* Apple’s near-black text */
+      background-color: #fafafa;
+    }
+
+    h1, h2, h3 {
+      font-weight: 600;
+      margin-top: 1.6em;
+      margin-bottom: 0.4em;
+      line-height: 1.2;
+      letter-spacing: -0.02em; /* tighten heading spacing */
     }
 
     h1 {
-      font-size: 2em;
-      font-weight: 600;
+      font-size: 2.2rem;
+    }
+
+    h2 {
+      font-size: 1.6rem;
     }
 
     p {
       font-weight: 400;
+      margin-bottom: 1em;
+      letter-spacing: 0.01em; /* tiny loosen for readability */
+    }
+
+    a {
+      color: #007aff; /* iOS blue link */
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: auto;
     }
   </style>
 </head>
 <body>
-  <h1>Apple-Style Font Stack Demo</h1>
-  <p>This is a paragraph to show how the font stack behaves on different devices. On iOS/macOS, it should use San Francisco (if supported). On Android, you'll most likely see Roboto. On Windows, Segoe UI, etc. The idea is consistency + native feel across platforms.</p>
+  <div class="container">
+    <h1>Apple-Inspired Typography</h1>
+    <p>This text is styled with <strong>Roboto</strong>, adjusted to feel more like Apple’s San Francisco font. Notice the line spacing, letter spacing, and weight choices.</p>
+    <h2>Why it feels different</h2>
+    <p>Apple tends to use generous white space, slightly tighter headings, and consistent use of medium weight for emphasis. Roboto can mimic this look well with some tweaks.</p>
+    <p><a href="#">This is a link</a> — notice the iOS blue style.</p>
+  </div>
 </body>
 </html>
