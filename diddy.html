@@ -1,15 +1,17 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Glowing Ball with Trail</title>
+<title>Roter Ball — Fullscreen + Trail</title>
 <style>
   html,body{
     height:100%;
     margin:0;
     background:#000;
-    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
   }
   .stage{
     position:relative;
@@ -20,10 +22,10 @@
   }
   canvas{
     position:absolute;
-    top:0;
-    left:0;
+    top:0;left:0;
     width:100%;
     height:100%;
+    display:block;
   }
   .ball{
     position:absolute;
@@ -39,7 +41,6 @@
       0 0 120px rgba(255,0,0,0.6),
       0 0 200px rgba(255,40,40,0.4);
     will-change: transform;
-    z-index:1;
   }
   button{
     position:absolute;
@@ -53,7 +54,6 @@
     color:white;
     font-size:16px;
     box-shadow:0 0 20px rgba(255,0,0,0.6);
-    z-index:2;
   }
 </style>
 </head>
@@ -89,37 +89,33 @@
 
   const smoothing = 0.05;
 
-  function drawTrail(x,y){
-    ctx.fillStyle = "rgba(200,200,200,0.15)";
-    ctx.beginPath();
-    ctx.arc(x, y, 2.5, 0, Math.PI*2);
-    ctx.fill();
-    // Slight fade effect for trail
-    ctx.fillStyle = "rgba(0,0,0,0.05)";
-    ctx.fillRect(0,0,width,height);
-  }
-
   function updateBall(){
-    // Smooth sensors
+    // Low-pass Filter
     smoothG.x += (g.x - smoothG.x) * smoothing;
     smoothG.y += (g.y - smoothG.y) * smoothing;
 
-    // Adjust with calibration
+    // Kalibrierung abziehen
     const adjX = smoothG.x - calib.x;
     const adjY = smoothG.y - calib.y;
 
     pos.x = width/2 + adjX * 25;
     pos.y = height/2 + adjY * 25;
 
-    // Clamp inside
+    // Begrenzung
     pos.x = Math.max(radius, Math.min(width-radius, pos.x));
     pos.y = Math.max(radius, Math.min(height-radius, pos.y));
 
+    // Ball setzen
     ball.style.left = pos.x+"px";
     ball.style.top = pos.y+"px";
 
-    // Draw trail
-    drawTrail(pos.x, pos.y);
+    // Trail zeichnen
+    ctx.fillStyle = "rgba(0,0,0,0.1)";
+    ctx.fillRect(0,0,width,height);
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 2.5, 0, Math.PI*2);
+    ctx.fillStyle = "rgba(200,200,200,0.6)";
+    ctx.fill();
 
     requestAnimationFrame(updateBall);
   }
@@ -142,9 +138,9 @@
   async function requestPermission(){
     // Fullscreen
     if (stage.requestFullscreen) stage.requestFullscreen();
-    // Try to lock orientation
+    // Orientation lock
     if (screen.orientation && screen.orientation.lock) {
-      try { await screen.orientation.lock("portrait"); } catch(e){ console.warn(e); }
+      try { await screen.orientation.lock("portrait"); } catch(e){ console.warn("Lock failed:", e); }
     }
 
     if (typeof DeviceMotionEvent !== "undefined" &&
