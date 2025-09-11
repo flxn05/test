@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Neuer Tab Test</title>
+</head>
+<body>
+  <button onclick="neuerTab()">Neuen Tab öffnen</button>
+
+  <script>
+    function neuerTab() {
+      // neuen Tab öffnen
+      const tab = window.open("", "_blank");
+
+      if (tab) {
+        // Inhalt reinschreiben
+        tab.document.write("<h1>Hallo, das ist ein neuer Tab, der per JS geöffnet wurde</h1>");
+
+        // nach 5 Sekunden wieder schließen
+        setTimeout(() => {
+          tab.close();
+        }, 5000);
+      } else {
+        alert("Popup wurde blockiert! Bitte Popups erlauben.");
+      }
+    }
+  </script>
+</body>
+</html>
