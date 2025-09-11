@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Roter Ball — Fullscreen + Trail</title>
+<title>Ball Path Tracker</title>
 <style>
   html,body{
     height:100%;
@@ -23,9 +23,7 @@
   canvas{
     position:absolute;
     top:0;left:0;
-    width:100%;
-    height:100%;
-    display:block;
+    width:100%;height:100%;
   }
   .ball{
     position:absolute;
@@ -41,6 +39,7 @@
       0 0 120px rgba(255,0,0,0.6),
       0 0 200px rgba(255,40,40,0.4);
     will-change: transform;
+    pointer-events:none;
   }
   button{
     position:absolute;
@@ -54,6 +53,7 @@
     color:white;
     font-size:16px;
     box-shadow:0 0 20px rgba(255,0,0,0.6);
+    z-index:10;
   }
 </style>
 </head>
@@ -88,34 +88,34 @@
   let calib = { x:0, y:0 };
 
   const smoothing = 0.05;
+  let lastPos = { x: pos.x, y: pos.y };
 
   function updateBall(){
-    // Low-pass Filter
     smoothG.x += (g.x - smoothG.x) * smoothing;
     smoothG.y += (g.y - smoothG.y) * smoothing;
 
-    // Kalibrierung abziehen
     const adjX = smoothG.x - calib.x;
     const adjY = smoothG.y - calib.y;
 
     pos.x = width/2 + adjX * 25;
     pos.y = height/2 + adjY * 25;
 
-    // Begrenzung
     pos.x = Math.max(radius, Math.min(width-radius, pos.x));
     pos.y = Math.max(radius, Math.min(height-radius, pos.y));
 
-    // Ball setzen
+    // Draw path line
+    ctx.beginPath();
+    ctx.moveTo(lastPos.x, lastPos.y);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.strokeStyle = "rgba(180,180,180,0.3)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    lastPos.x = pos.x;
+    lastPos.y = pos.y;
+
     ball.style.left = pos.x+"px";
     ball.style.top = pos.y+"px";
-
-    // Trail zeichnen
-    ctx.fillStyle = "rgba(0,0,0,0.1)";
-    ctx.fillRect(0,0,width,height);
-    ctx.beginPath();
-    ctx.arc(pos.x, pos.y, 2.5, 0, Math.PI*2);
-    ctx.fillStyle = "rgba(200,200,200,0.6)";
-    ctx.fill();
 
     requestAnimationFrame(updateBall);
   }
@@ -136,11 +136,9 @@
   }
 
   async function requestPermission(){
-    // Fullscreen
     if (stage.requestFullscreen) stage.requestFullscreen();
-    // Orientation lock
-    if (screen.orientation && screen.orientation.lock) {
-      try { await screen.orientation.lock("portrait"); } catch(e){ console.warn("Lock failed:", e); }
+    if (screen.orientation && screen.orientation.lock){
+      try{ await screen.orientation.lock("portrait"); }catch(e){ console.warn("Orientation lock not supported",e); }
     }
 
     if (typeof DeviceMotionEvent !== "undefined" &&
