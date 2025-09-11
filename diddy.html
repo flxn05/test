@@ -3,50 +3,50 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Roter Ball — Smoothe Gravitation</title>
+<title>Roter Ball — Fullscreen & Kalibrierung</title>
 <style>
   html,body{
     height:100%;
     margin:0;
-    background:#0b1020;
+    background:#000;
     display:flex;
     align-items:center;
     justify-content:center;
   }
   .stage{
     position:relative;
-    width:90vw;
-    height:80vh;
-    max-width:600px;
-    max-height:800px;
-    background:#111827;
-    border-radius:18px;
-    box-shadow:0 0 20px rgba(0,0,0,0.5) inset;
+    width:100vw;
+    height:100vh;
+    background:#000;
     overflow:hidden;
   }
   .ball{
     position:absolute;
-    width:64px;
-    height:64px;
+    width:80px;
+    height:80px;
     border-radius:50%;
     left:50%;
     top:50%;
     transform:translate(-50%,-50%);
-    background: radial-gradient(circle at 35% 30%, #ff6b6b 0%, #e11 40%, #8b0000 100%);
-    box-shadow: 0 0 40px rgba(255,80,80,0.6);
+    background: radial-gradient(circle at 35% 30%, #ff8080 0%, #ff0000 40%, #7a0000 100%);
+    box-shadow:
+      0 0 60px rgba(255,80,80,0.9),
+      0 0 120px rgba(255,0,0,0.6),
+      0 0 200px rgba(255,40,40,0.4);
     will-change: transform;
   }
   button{
     position:absolute;
-    bottom:10px;
+    bottom:20px;
     left:50%;
     transform:translateX(-50%);
-    padding:10px 16px;
+    padding:12px 18px;
     border:none;
-    border-radius:10px;
-    background:#e04848;
+    border-radius:12px;
+    background:#e00000;
     color:white;
-    font-size:14px;
+    font-size:16px;
+    box-shadow:0 0 20px rgba(255,0,0,0.6);
   }
 </style>
 </head>
@@ -62,34 +62,38 @@
   const stage = document.getElementById('stage');
   const reqBtn = document.getElementById('reqBtn');
 
-  let width, height, radius = 32;
+  let width, height, radius = 40;
   function measure(){
-    const rect = stage.getBoundingClientRect();
-    width = rect.width;
-    height = rect.height;
+    width = window.innerWidth;
+    height = window.innerHeight;
   }
   measure(); window.addEventListener('resize', measure);
 
   let pos = { x: width/2, y: height/2 };
-  let g = { x:0, y:0 };   // aktuelle Sensorwerte
-  let smoothG = { x:0, y:0 }; // geglättete Werte
+  let g = { x:0, y:0 };   
+  let smoothG = { x:0, y:0 };
 
-  const smoothing = 0.05; // kleiner = glatter
+  let calib = { x:0, y:0 }; // Nullpunkt
+  let calibrated = false;
+
+  const smoothing = 0.05;
 
   function updateBall(){
     // Low-pass Filter
     smoothG.x += (g.x - smoothG.x) * smoothing;
     smoothG.y += (g.y - smoothG.y) * smoothing;
 
-    // Neue Position abhängig von Gravitation
-    pos.x = width/2 + smoothG.x * 20;
-    pos.y = height/2 + smoothG.y * 20;
+    // Kalibrierung abziehen → Ball ist in Mitte bei normaler Halteposition
+    const adjX = smoothG.x - calib.x;
+    const adjY = smoothG.y - calib.y;
 
-    // Begrenzung an Rändern (kein Bouncing, einfach clamp)
+    pos.x = width/2 + adjX * 25;
+    pos.y = height/2 + adjY * 25;
+
+    // Begrenzung
     pos.x = Math.max(radius, Math.min(width-radius, pos.x));
     pos.y = Math.max(radius, Math.min(height-radius, pos.y));
 
-    // Anwenden
     ball.style.left = pos.x+"px";
     ball.style.top = pos.y+"px";
 
@@ -100,8 +104,8 @@
   function handleMotion(e){
     const a = e.accelerationIncludingGravity;
     if (a){
-      g.x = a.x || 0;     // links/rechts
-      g.y = -(a.y || 0);  // kippen vor/zurück
+      g.x = a.x || 0;
+      g.y = -(a.y || 0);
     }
   }
   function handleOrientation(e){
@@ -112,6 +116,9 @@
   }
 
   async function requestPermission(){
+    // Fullscreen anfordern
+    if (stage.requestFullscreen) stage.requestFullscreen();
+
     if (typeof DeviceMotionEvent !== "undefined" &&
         typeof DeviceMotionEvent.requestPermission === "function"){
       try{
@@ -119,12 +126,22 @@
         if (res === "granted"){
           window.addEventListener("devicemotion", handleMotion, {passive:true});
           window.addEventListener("deviceorientation", handleOrientation, {passive:true});
+          calibrate();
+          reqBtn.style.display="none";
         }
       }catch(err){ console.error(err); }
     } else {
       window.addEventListener("devicemotion", handleMotion, {passive:true});
       window.addEventListener("deviceorientation", handleOrientation, {passive:true});
+      calibrate();
+      reqBtn.style.display="none";
     }
+  }
+
+  function calibrate(){
+    calib.x = g.x;
+    calib.y = g.y;
+    calibrated = true;
   }
 
   reqBtn.addEventListener("click", requestPermission);
