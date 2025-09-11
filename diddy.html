@@ -1,17 +1,15 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>Roter Ball — Fullscreen & Kalibrierung</title>
+<title>Glowing Ball with Trail</title>
 <style>
   html,body{
     height:100%;
     margin:0;
     background:#000;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    overflow:hidden;
   }
   .stage{
     position:relative;
@@ -19,6 +17,13 @@
     height:100vh;
     background:#000;
     overflow:hidden;
+  }
+  canvas{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
   }
   .ball{
     position:absolute;
@@ -34,6 +39,7 @@
       0 0 120px rgba(255,0,0,0.6),
       0 0 200px rgba(255,40,40,0.4);
     will-change: transform;
+    z-index:1;
   }
   button{
     position:absolute;
@@ -47,11 +53,13 @@
     color:white;
     font-size:16px;
     box-shadow:0 0 20px rgba(255,0,0,0.6);
+    z-index:2;
   }
 </style>
 </head>
 <body>
   <div class="stage" id="stage">
+    <canvas id="trail"></canvas>
     <div id="ball" class="ball"></div>
     <button id="reqBtn">Sensor erlauben</button>
   </div>
@@ -61,11 +69,15 @@
   const ball = document.getElementById('ball');
   const stage = document.getElementById('stage');
   const reqBtn = document.getElementById('reqBtn');
+  const canvas = document.getElementById('trail');
+  const ctx = canvas.getContext('2d');
 
   let width, height, radius = 40;
   function measure(){
     width = window.innerWidth;
     height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
   }
   measure(); window.addEventListener('resize', measure);
 
@@ -73,29 +85,41 @@
   let g = { x:0, y:0 };   
   let smoothG = { x:0, y:0 };
 
-  let calib = { x:0, y:0 }; // Nullpunkt
-  let calibrated = false;
+  let calib = { x:0, y:0 };
 
   const smoothing = 0.05;
 
+  function drawTrail(x,y){
+    ctx.fillStyle = "rgba(200,200,200,0.15)";
+    ctx.beginPath();
+    ctx.arc(x, y, 2.5, 0, Math.PI*2);
+    ctx.fill();
+    // Slight fade effect for trail
+    ctx.fillStyle = "rgba(0,0,0,0.05)";
+    ctx.fillRect(0,0,width,height);
+  }
+
   function updateBall(){
-    // Low-pass Filter
+    // Smooth sensors
     smoothG.x += (g.x - smoothG.x) * smoothing;
     smoothG.y += (g.y - smoothG.y) * smoothing;
 
-    // Kalibrierung abziehen → Ball ist in Mitte bei normaler Halteposition
+    // Adjust with calibration
     const adjX = smoothG.x - calib.x;
     const adjY = smoothG.y - calib.y;
 
     pos.x = width/2 + adjX * 25;
     pos.y = height/2 + adjY * 25;
 
-    // Begrenzung
+    // Clamp inside
     pos.x = Math.max(radius, Math.min(width-radius, pos.x));
     pos.y = Math.max(radius, Math.min(height-radius, pos.y));
 
     ball.style.left = pos.x+"px";
     ball.style.top = pos.y+"px";
+
+    // Draw trail
+    drawTrail(pos.x, pos.y);
 
     requestAnimationFrame(updateBall);
   }
@@ -116,8 +140,12 @@
   }
 
   async function requestPermission(){
-    // Fullscreen anfordern
+    // Fullscreen
     if (stage.requestFullscreen) stage.requestFullscreen();
+    // Try to lock orientation
+    if (screen.orientation && screen.orientation.lock) {
+      try { await screen.orientation.lock("portrait"); } catch(e){ console.warn(e); }
+    }
 
     if (typeof DeviceMotionEvent !== "undefined" &&
         typeof DeviceMotionEvent.requestPermission === "function"){
@@ -141,7 +169,6 @@
   function calibrate(){
     calib.x = g.x;
     calib.y = g.y;
-    calibrated = true;
   }
 
   reqBtn.addEventListener("click", requestPermission);
