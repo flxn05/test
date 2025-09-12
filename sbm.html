@@ -26,29 +26,24 @@ const ctx = canvas.getContext('2d');
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 
-let lastMinute = null; let animatingDigits = [];
+let lastTimeStr = ''; let digitAnimations = [];
 
-// Gradient texture for text const gradientTexture = ctx.createLinearGradient(0, 0, 0, canvas.height); gradientTexture.addColorStop(0, '#ff9a9e'); gradientTexture.addColorStop(0.5, '#fad0c4'); gradientTexture.addColorStop(1, '#fad0c4');
+function drawDigit(digit, x, y, scale = 1, opacity = 1) { ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale); ctx.globalAlpha = opacity; ctx.font = 'bold 200px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; // Gradient fill for texture const gradient = ctx.createLinearGradient(0, -100, 0, 100); gradient.addColorStop(0, '#ff9a9e'); gradient.addColorStop(0.5, '#fad0c4'); gradient.addColorStop(1, '#fad0c4'); ctx.fillStyle = gradient; ctx.fillText(digit, 0, 0); ctx.restore(); }
 
-function drawDigit(digit, x, y, scale = 1, opacity = 1) { ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale); ctx.globalAlpha = opacity; ctx.font = 'bold 200px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = gradientTexture; ctx.fillText(digit, 0, 0); ctx.restore(); }
+function animateDigits() { for (let i = digitAnimations.length - 1; i >= 0; i--) { const anim = digitAnimations[i]; anim.progress += 0.05; if (anim.progress >= 1) { digitAnimations.splice(i, 1); drawDigit(anim.value, anim.x, anim.toY, anim.toScale, anim.toOpacity); continue; } const ease = 1 - Math.pow(1 - anim.progress, 3); const scale = anim.fromScale + (anim.toScale - anim.fromScale) * ease; const y = anim.fromY + (anim.toY - anim.fromY) * ease; const opacity = anim.fromOpacity + (anim.toOpacity - anim.fromOpacity) * ease; drawDigit(anim.value, anim.x, y, scale, opacity); } }
 
-function animateDigits() { for (let i = animatingDigits.length - 1; i >= 0; i--) { const d = animatingDigits[i]; d.progress += 0.05; if (d.progress >= 1) { animatingDigits.splice(i, 1); continue; } const ease = 1 - Math.pow(1 - d.progress, 3); const scale = d.fromScale + (d.toScale - d.fromScale) * ease; const y = d.fromY + (d.toY - d.fromY) * ease; const opacity = d.fromOpacity + (d.toOpacity - d.fromOpacity) * ease; drawDigit(d.value, d.x, y, scale, opacity); } }
-
-function drawClock() { ctx.clearRect(0, 0, canvas.width, canvas.height); const now = new Date(); let hours = now.getHours(); let minutes = now.getMinutes();
-
-const timeStr = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}`;
+function drawClock() { ctx.clearRect(0, 0, canvas.width, canvas.height); const now = new Date(); const hours = now.getHours().toString().padStart(2, '0'); const minutes = now.getMinutes().toString().padStart(2, '0'); const timeStr = ${hours}:${minutes};
 
 const centerX = canvas.width / 2;
 const centerY = canvas.height / 2;
 const digitSpacing = 220;
 
-// Trigger animation if minute changed
-if (minutes !== lastMinute) {
-    animatingDigits = [];
+if (timeStr !== lastTimeStr) {
+    digitAnimations = [];
     for (let i = 0; i < timeStr.length; i++) {
-        animatingDigits.push({
+        digitAnimations.push({
             value: timeStr[i],
-            x: centerX + (i - timeStr.length/2 + 0.5) * digitSpacing,
+            x: centerX + (i - timeStr.length / 2 + 0.5) * digitSpacing,
             fromY: centerY + 50,
             toY: centerY,
             fromScale: 0.7,
@@ -58,11 +53,10 @@ if (minutes !== lastMinute) {
             progress: 0
         });
     }
-    lastMinute = minutes;
+    lastTimeStr = timeStr;
 }
 
 animateDigits();
-
 requestAnimationFrame(drawClock);
 
 }
