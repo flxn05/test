@@ -22,44 +22,21 @@
 <canvas id="clock"></canvas>
 <script>
 const canvas = document.getElementById('clock');
-const ctx = canvas.getContext('2d');
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+const ctx = canvas.getContext('2d');function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; } window.addEventListener('resize', resizeCanvas); resizeCanvas();
 
-let lastTimeStr = ''; let digitAnimations = [];
+let lastTime = ''; let digitAnimations = [];
 
-function drawDigit(digit, x, y, scale = 1, opacity = 1) { ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale); ctx.globalAlpha = opacity; ctx.font = 'bold 200px Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; // Gradient fill for texture const gradient = ctx.createLinearGradient(0, -100, 0, 100); gradient.addColorStop(0, '#ff9a9e'); gradient.addColorStop(0.5, '#fad0c4'); gradient.addColorStop(1, '#fad0c4'); ctx.fillStyle = gradient; ctx.fillText(digit, 0, 0); ctx.restore(); }
+function getCurrentTimeString() { const now = new Date(); const hours = now.getHours().toString().padStart(2,'0'); const minutes = now.getMinutes().toString().padStart(2,'0'); return ${hours}:${minutes}; }
 
-function animateDigits() { for (let i = digitAnimations.length - 1; i >= 0; i--) { const anim = digitAnimations[i]; anim.progress += 0.05; if (anim.progress >= 1) { digitAnimations.splice(i, 1); drawDigit(anim.value, anim.x, anim.toY, anim.toScale, anim.toOpacity); continue; } const ease = 1 - Math.pow(1 - anim.progress, 3); const scale = anim.fromScale + (anim.toScale - anim.fromScale) * ease; const y = anim.fromY + (anim.toY - anim.fromY) * ease; const opacity = anim.fromOpacity + (anim.toOpacity - anim.fromOpacity) * ease; drawDigit(anim.value, anim.x, y, scale, opacity); } }
+function createGradient(x, y, size) { const gradient = ctx.createLinearGradient(x - size/2, y - size/2, x + size/2, y + size/2); gradient.addColorStop(0, '#ff9a9e'); gradient.addColorStop(0.5, '#fad0c4'); gradient.addColorStop(1, '#fad0c4'); return gradient; }
 
-function drawClock() { ctx.clearRect(0, 0, canvas.width, canvas.height); const now = new Date(); const hours = now.getHours().toString().padStart(2, '0'); const minutes = now.getMinutes().toString().padStart(2, '0'); const timeStr = ${hours}:${minutes};
+function drawDigit(digit, x, y, scale=1, opacity=1) { ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale); ctx.globalAlpha = opacity; const fontSize = 200; ctx.font = bold ${fontSize}px Arial; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = createGradient(x, y, fontSize); ctx.fillText(digit, 0, 0); ctx.restore(); }
 
-const centerX = canvas.width / 2;
-const centerY = canvas.height / 2;
-const digitSpacing = 220;
+function animateDigits() { for (let i = digitAnimations.length - 1; i >= 0; i--) { const anim = digitAnimations[i]; anim.progress += 0.05; if (anim.progress >= 1) { digitAnimations.splice(i,1); drawDigit(anim.value, anim.x, anim.toY, anim.toScale, anim.toOpacity); continue; } const ease = 1 - Math.pow(1 - anim.progress, 3); const scale = anim.fromScale + (anim.toScale - anim.fromScale) * ease; const y = anim.fromY + (anim.toY - anim.fromY) * ease; const opacity = anim.fromOpacity + (anim.toOpacity - anim.fromOpacity) * ease; drawDigit(anim.value, anim.x, y, scale, opacity); } }
 
-if (timeStr !== lastTimeStr) {
-    digitAnimations = [];
-    for (let i = 0; i < timeStr.length; i++) {
-        digitAnimations.push({
-            value: timeStr[i],
-            x: centerX + (i - timeStr.length / 2 + 0.5) * digitSpacing,
-            fromY: centerY + 50,
-            toY: centerY,
-            fromScale: 0.7,
-            toScale: 1,
-            fromOpacity: 0,
-            toOpacity: 1,
-            progress: 0
-        });
-    }
-    lastTimeStr = timeStr;
-}
+function updateAnimations() { const timeStr = getCurrentTimeString(); if (timeStr !== lastTime) { digitAnimations = []; const centerX = canvas.width/2; const centerY = canvas.height/2; const spacing = 180; for (let i = 0; i < timeStr.length; i++) { digitAnimations.push({ value: timeStr[i], x: centerX + (i - timeStr.length/2 + 0.5)*spacing, fromY: centerY + 50, toY: centerY, fromScale: 0.7, toScale: 1, fromOpacity: 0, toOpacity: 1, progress: 0 }); } lastTime = timeStr; } }
 
-animateDigits();
-requestAnimationFrame(drawClock);
-
-}
+function drawClock() { ctx.clearRect(0,0,canvas.width,canvas.height); updateAnimations(); animateDigits(); requestAnimationFrame(drawClock); }
 
 drawClock(); </script>
 
