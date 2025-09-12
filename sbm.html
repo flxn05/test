@@ -2,50 +2,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apple StandBy Clock Canvas</title>
+<title>Apple StandBy Clock Clone</title>
 <style>
-  body {
+  body, html {
     margin: 0;
-    background: #000;
-    color: white;
+    padding: 0;
+    background: black;
     overflow: hidden;
-    font-family: 'San Francisco', sans-serif;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'SF Pro', sans-serif;
   }
-  #startButton {
+  #enterFullscreen {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    z-index: 10;
     padding: 20px 40px;
     font-size: 24px;
-    cursor: pointer;
-    background: #1a1a1a;
-    border: 2px solid #fff;
+    border: none;
     border-radius: 12px;
+    background: linear-gradient(135deg, #555, #222);
+    color: white;
+    cursor: pointer;
+  }
+  canvas {
+    display: block;
   }
 </style>
 </head>
 <body>
+<button id="enterFullscreen">Enter Fullscreen</button>
 <canvas id="clockCanvas"></canvas>
-<button id="startButton">Enter StandBy</button>
 <script>
 const canvas = document.getElementById('clockCanvas');
 const ctx = canvas.getContext('2d');
-let width, height;function resize() { width = window.innerWidth; height = window.innerHeight; canvas.width = width; canvas.height = height; } window.addEventListener('resize', resize); resize();
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;const textureCanvas = document.createElement('canvas'); const tctx = textureCanvas.getContext('2d'); textureCanvas.width = 200; textureCanvas.height = 200; // Simple bubble-like texture for(let i=0; i<500; i++){ tctx.fillStyle = 'rgba(255,255,255,' + Math.random()*0.2 + ')'; tctx.beginPath(); tctx.arc(Math.random()*200, Math.random()*200, Math.random()8+2, 0, Math.PI2); tctx.fill(); } const texture = ctx.createPattern(textureCanvas,'repeat');
 
-// Clock settings const fontSize = 200; const textureGradient = ctx.createLinearGradient(0, 0, 0, fontSize); textureGradient.addColorStop(0, '#ffdd00'); textureGradient.addColorStop(0.5, '#ff5500'); textureGradient.addColorStop(1, '#ffaa00');
+// Letter class for animation class Letter { constructor(char, x, y){ this.char = char; this.x = x; this.y = y; this.targetY = y; this.scale = 1; this.opacity = 1; } update(){ this.y += (this.targetY - this.y) * 0.1; this.scale += (1 - this.scale) * 0.1; this.opacity += (1 - this.opacity) * 0.1; } draw(ctx){ ctx.save(); ctx.translate(this.x, this.y); ctx.scale(this.scale,this.scale); ctx.globalAlpha = this.opacity; ctx.fillStyle = texture; ctx.font = '160px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(this.char,0,0); ctx.restore(); } }
 
-let lastTime = ''; let glyphs = [];
+let letters = []; function createLetters(timeStr){ letters = []; const startX = width/2 - timeStr.length90; for(let i=0;i<timeStr.length;i++){ letters.push(new Letter(timeStr[i], startX+i180, height/2)); } }
 
-class Glyph { constructor(char, x, y) { this.char = char; this.x = x; this.y = y; this.scale = 1; this.opacity = 1; this.targetScale = 1; this.targetOpacity = 1; this.targetY = y; } update(dt) { this.scale += (this.targetScale - this.scale) * dt * 5; this.opacity += (this.targetOpacity - this.opacity) * dt * 5; this.y += (this.targetY - this.y) * dt * 5; } draw(ctx) { ctx.save(); ctx.globalAlpha = this.opacity; ctx.translate(this.x, this.y); ctx.scale(this.scale, this.scale); ctx.fillStyle = textureGradient; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(this.char, 0, 0); ctx.restore(); } }
+function getTimeStr(){ const now = new Date(); const h = now.getHours().toString().padStart(2,'0'); const m = now.getMinutes().toString().padStart(2,'0'); return h + ':' + m; }
 
-function createGlyphs(timeStr) { glyphs = []; const totalWidth = ctx.measureText(timeStr).width; let startX = width/2 - totalWidth/2; for (let i = 0; i < timeStr.length; i++) { const char = timeStr[i]; const w = ctx.measureText(char).width; glyphs.push(new Glyph(char, startX + w/2, height/2)); startX += w; } }
+let lastTime = getTimeStr(); createLetters(lastTime);
 
-function animate(time) { ctx.clearRect(0, 0, width, height); const now = new Date(); const h = now.getHours().toString().padStart(2, '0'); const m = now.getMinutes().toString().padStart(2, '0'); const timeStr = ${h}:${m};
+function animate(){ ctx.clearRect(0,0,width,height); for(let l of letters){ l.update(); l.draw(ctx); } requestAnimationFrame(animate); } animate();
 
-if(timeStr !== lastTime) { lastTime = timeStr; // Animate old glyphs out and new in createGlyphs(timeStr); glyphs.forEach(g => { g.scale = 0.8; g.opacity = 0; g.targetScale = 1; g.targetOpacity = 1; g.targetY = height/2; }); }
+setInterval(()=>{ const newTime = getTimeStr(); if(newTime !== lastTime){ const startX = width/2 - newTime.length*90; for(let i=0;i<newTime.length;i++){ if(letters[i]){ letters[i].char = newTime[i]; letters[i].scale = 1.2 + Math.random()0.3; letters[i].y = height/2 - 20; letters[i].opacity = 0; } else { letters.push(new Letter(newTime[i], startX+i180, height/2)); } } lastTime = newTime; } },1000);
 
-const dt = 0.016; // ~60fps glyphs.forEach(g => { g.update(dt); g.draw(ctx); }); requestAnimationFrame(animate); }
+window.addEventListener('resize',()=>{ width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; });
 
-const startButton = document.getElementById('startButton'); startButton.addEventListener('click', () => { if (canvas.requestFullscreen) canvas.requestFullscreen(); startButton.style.display = 'none'; ctx.font = ${fontSize}px sans-serif; createGlyphs('00:00'); animate(); });
+// Fullscreen button document.getElementById('enterFullscreen').addEventListener('click', ()=>{ if(canvas.requestFullscreen){ canvas.requestFullscreen(); } else if(canvas.webkitRequestFullscreen){ canvas.webkitRequestFullscreen(); } document.getElementById('enterFullscreen').style.display='none'; });
 
