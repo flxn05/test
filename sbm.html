@@ -2,29 +2,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apple StandBy Clock Clone</title>
+<title>Apple StandBy Canvas Clock</title>
 <style>
-  body, html {
+  body {
     margin: 0;
-    padding: 0;
     background: black;
     overflow: hidden;
-    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'SF Pro', sans-serif;
-  }
-  #enterFullscreen {
-    position: absolute;
-    z-index: 10;
-    padding: 20px 40px;
-    font-size: 24px;
-    border: none;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #555, #222);
-    color: white;
-    cursor: pointer;
+    height: 100vh;
   }
   canvas {
     display: block;
@@ -32,27 +19,55 @@
 </style>
 </head>
 <body>
-<button id="enterFullscreen">Enter Fullscreen</button>
-<canvas id="clockCanvas"></canvas>
+<canvas id="clock"></canvas>
 <script>
-const canvas = document.getElementById('clockCanvas');
+const canvas = document.getElementById('clock');
 const ctx = canvas.getContext('2d');
-let width = canvas.width = window.innerWidth;
-let height = canvas.height = window.innerHeight;const textureCanvas = document.createElement('canvas'); const tctx = textureCanvas.getContext('2d'); textureCanvas.width = 200; textureCanvas.height = 200; // Simple bubble-like texture for(let i=0; i<500; i++){ tctx.fillStyle = 'rgba(255,255,255,' + Math.random()*0.2 + ')'; tctx.beginPath(); tctx.arc(Math.random()*200, Math.random()*200, Math.random()8+2, 0, Math.PI2); tctx.fill(); } const texture = ctx.createPattern(textureCanvas,'repeat');
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
 
-// Letter class for animation class Letter { constructor(char, x, y){ this.char = char; this.x = x; this.y = y; this.targetY = y; this.scale = 1; this.opacity = 1; } update(){ this.y += (this.targetY - this.y) * 0.1; this.scale += (1 - this.scale) * 0.1; this.opacity += (1 - this.opacity) * 0.1; } draw(ctx){ ctx.save(); ctx.translate(this.x, this.y); ctx.scale(this.scale,this.scale); ctx.globalAlpha = this.opacity; ctx.fillStyle = texture; ctx.font = '160px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(this.char,0,0); ctx.restore(); } }
+let lastMinute = null; let animatingDigits = [];
 
-let letters = []; function createLetters(timeStr){ letters = []; const startX = width/2 - timeStr.length90; for(let i=0;i<timeStr.length;i++){ letters.push(new Letter(timeStr[i], startX+i180, height/2)); } }
+// Gradient texture for text const gradientTexture = ctx.createLinearGradient(0, 0, 0, canvas.height); gradientTexture.addColorStop(0, '#ff9a9e'); gradientTexture.addColorStop(0.5, '#fad0c4'); gradientTexture.addColorStop(1, '#fad0c4');
 
-function getTimeStr(){ const now = new Date(); const h = now.getHours().toString().padStart(2,'0'); const m = now.getMinutes().toString().padStart(2,'0'); return h + ':' + m; }
+function drawDigit(digit, x, y, scale = 1, opacity = 1) { ctx.save(); ctx.translate(x, y); ctx.scale(scale, scale); ctx.globalAlpha = opacity; ctx.font = 'bold 200px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = gradientTexture; ctx.fillText(digit, 0, 0); ctx.restore(); }
 
-let lastTime = getTimeStr(); createLetters(lastTime);
+function animateDigits() { for (let i = animatingDigits.length - 1; i >= 0; i--) { const d = animatingDigits[i]; d.progress += 0.05; if (d.progress >= 1) { animatingDigits.splice(i, 1); continue; } const ease = 1 - Math.pow(1 - d.progress, 3); const scale = d.fromScale + (d.toScale - d.fromScale) * ease; const y = d.fromY + (d.toY - d.fromY) * ease; const opacity = d.fromOpacity + (d.toOpacity - d.fromOpacity) * ease; drawDigit(d.value, d.x, y, scale, opacity); } }
 
-function animate(){ ctx.clearRect(0,0,width,height); for(let l of letters){ l.update(); l.draw(ctx); } requestAnimationFrame(animate); } animate();
+function drawClock() { ctx.clearRect(0, 0, canvas.width, canvas.height); const now = new Date(); let hours = now.getHours(); let minutes = now.getMinutes();
 
-setInterval(()=>{ const newTime = getTimeStr(); if(newTime !== lastTime){ const startX = width/2 - newTime.length*90; for(let i=0;i<newTime.length;i++){ if(letters[i]){ letters[i].char = newTime[i]; letters[i].scale = 1.2 + Math.random()0.3; letters[i].y = height/2 - 20; letters[i].opacity = 0; } else { letters.push(new Letter(newTime[i], startX+i180, height/2)); } } lastTime = newTime; } },1000);
+const timeStr = `${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}`;
 
-window.addEventListener('resize',()=>{ width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; });
+const centerX = canvas.width / 2;
+const centerY = canvas.height / 2;
+const digitSpacing = 220;
 
-// Fullscreen button document.getElementById('enterFullscreen').addEventListener('click', ()=>{ if(canvas.requestFullscreen){ canvas.requestFullscreen(); } else if(canvas.webkitRequestFullscreen){ canvas.webkitRequestFullscreen(); } document.getElementById('enterFullscreen').style.display='none'; });
+// Trigger animation if minute changed
+if (minutes !== lastMinute) {
+    animatingDigits = [];
+    for (let i = 0; i < timeStr.length; i++) {
+        animatingDigits.push({
+            value: timeStr[i],
+            x: centerX + (i - timeStr.length/2 + 0.5) * digitSpacing,
+            fromY: centerY + 50,
+            toY: centerY,
+            fromScale: 0.7,
+            toScale: 1,
+            fromOpacity: 0,
+            toOpacity: 1,
+            progress: 0
+        });
+    }
+    lastMinute = minutes;
+}
 
+animateDigits();
+
+requestAnimationFrame(drawClock);
+
+}
+
+drawClock(); </script>
+
+</body>
+</html>
